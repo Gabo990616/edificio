@@ -1,0 +1,39 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block contenido %}
+  <section class="card" id="formApartamento">
+    <h1>Datos del Apartamento</h1>
+    <label>Seleccione Apartamento:<select id="selectApartamento"></select></label>
+
+    <form id="apartamentoForm">
+      <label>Nombre del apartamento:<input type="text" name="nombreApartamento" required /></label>
+
+      <label>Bloque:<select name="bloque" required></select></label>
+
+      <label>Piso:<select name="piso" required></select></label>
+
+      <label>Propietario:<input type="text" name="propietario" required placeholder="Nombres y Apellidos" /></label>
+
+      <label>
+        Cantidad de Habitaciones:<select name="habitaciones" required>
+          <option value="Estudio">Estudio</option>
+          <option value="1 Hab">1 Hab</option>
+          <option value="2 Hab">2 Hab</option>
+          <option value="3 Hab">3 Hab</option>
+          <option value="4 Hab">4 Hab</option>
+        </select>
+      </label>
+
+      <label><input type="checkbox" id="adeudoCheck" name="adeudoCheck" />¿Tiene adeudo?</label>
+
+      <label id="adeudoInputLabel" style="display:none;">Monto del adeudo:<input type="number" name="adeudo" min="0" step="0.01" /></label>
+
+      <label><input type="checkbox" id="vallaCheck" name="vallaCheck" />¿Tiene valla?</label>
+
+      <label id="vallaNumeroLabel" style="display:none;">Número de valla:<input type="text" name="numeroValla" /></label>
+
+      <button type="submit" id="guardarBtnApto">Guardar</button>
+      <button type="button" id="modificarBtnApto" style="display:none;">Modificar</button>
+    </form>
+  </section>
+{% endblock %}

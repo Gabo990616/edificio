@@ -1,0 +1,5 @@
+django == 5.2.4
+pillow
+django-admin-interface
+django-crispy-forms
+crispy-bootstrap4
