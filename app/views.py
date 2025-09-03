@@ -257,3 +257,28 @@ def clear_session_propietario(request):
     if "nuevo_propietario_id" in request.session:
         del request.session["nuevo_propietario_id"]
     return JsonResponse({"status": "ok"})
+
+
+def registrar_movimiento_propietario(request, dni):
+    propietario = get_object_or_404(Propietario, dni=dni)
+
+    if request.method == "POST":
+        form = MovimientoPropietarioForm(request.POST)
+        if form.is_valid():
+            movimiento = form.save(commit=False)
+            movimiento.propietario = propietario
+            movimiento.save()
+
+            messages.success(
+                request,
+                f"Movimiento registrado correctamente para {propietario.nombre}",
+            )
+            return redirect("listar_propietarios")
+    else:
+        form = MovimientoPropietarioForm(initial={"fecha": timezone.now()})
+
+    return render(
+        request,
+        "app/movimientos/agregar.html",
+        {"form": form, "propietario": propietario, "titulo": "Registrar Movimiento"},
+    )

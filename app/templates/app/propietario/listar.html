@@ -42,6 +42,7 @@
                 <th class="col-text">Telefono</th>
                 <th class="col-opciones text-center">Opciones</th>
               </tr>
+              
             </thead>
             <tbody>
               {% if entity %}
@@ -52,8 +53,9 @@
                     <td class="col-text">{{ e.nacionalidad }}</td>
                     <td class="col-text">{{ e.telefono }}</td>
                     <td class="col-opciones text-center">
-                      <a href="{% url 'modificar_propietario' e.dni %}" class="btn btn-info btn-sm btn-action"><i class="bi bi-pencil"></i> Editar</a>
-                      <a href="#" onclick="confirmarEliminacion({{ e.dni }})" class="btn btn-danger btn-sm btn-action"><i class="bi bi-trash"></i> Eliminar</a>
+                      <a href="{% url 'modificar_propietario' e.dni %}" class="btn btn-info btn-sm"><i class="bi bi-pencil"></i></a>
+                      <a href="#" onclick="confirmarEliminacion({{ e.dni }})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                      <a href="{% url 'registrar_movimiento_propietario' e.dni %}" class="btn btn-info btn-sm"><i class="bi bi-calendar-plus"></i></a>
                     </td>
                   </tr>
                 {% endfor %}

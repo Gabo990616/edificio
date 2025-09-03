@@ -5,3 +5,4 @@ from .models import *
 admin.site.register(Edificio)
 admin.site.register(Apartamento)
 admin.site.register(Propietario)
+admin.site.register(MovimientoPropietario)
