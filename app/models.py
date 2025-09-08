@@ -107,7 +107,7 @@ class Apartamento(models.Model):
     piso = models.CharField(max_length=50)
     cant_habitaciones = models.IntegerField()
     adeudo = models.BooleanField()
-    cant_adeudo = models.FloatField()
+    cant_adeudo = models.FloatField(default=0, validators=[MinValueValidator(0.0)])
     fecha_adeudo = models.DateField()
     valla = models.BooleanField()
     numero_valla = models.IntegerField()

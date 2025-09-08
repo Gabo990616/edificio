@@ -14,6 +14,7 @@ urlpatterns = [
     path("adicionar_propietario/", adicionar_propietario, name="adicionar_propietario"),
     path("listar_propietarios/", listar_propietarios, name="listar_propietarios"),
     path("modificar_propietario/<str:dni>/", modificar_propietario, name="modificar_propietario"),
+    path("detalle_propietario/<str:dni>/", detalle_propietario, name="detalle_propietario"),
     path("eliminar_propietario/<str:dni>/", eliminar_propietario, name="eliminar_propietario"),
     path('clear_session_propietario/', clear_session_propietario, name='clear_session_propietario'),
     path('<str:dni>/movimiento/registrar/', registrar_movimiento_propietario, name='registrar_movimiento_propietario'),

@@ -42,13 +42,14 @@
                 <th class="col-text">Telefono</th>
                 <th class="col-opciones text-center">Opciones</th>
               </tr>
-              
             </thead>
             <tbody>
               {% if entity %}
                 {% for e in entity %}
                   <tr>
-                    <td class="col-text">{{ e.nombre }}</td>
+                    <td class="col-text">
+                      <a href="{% url 'detalle_propietario' e.dni %}" class="">{{ e.nombre }}</a>
+                    </td>
                     <td class="col-text">{{ e.dni }}</td>
                     <td class="col-text">{{ e.nacionalidad }}</td>
                     <td class="col-text">{{ e.telefono }}</td>

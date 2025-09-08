@@ -244,6 +244,38 @@ def modificar_propietario(request, dni):
     return render(request, "app/propietario/modificar.html", data)
 
 
+def detalle_propietario(request, dni):
+    propietario = get_object_or_404(Propietario, dni=dni)
+    movimientos = MovimientoPropietario.objects.filter(
+        propietario=propietario
+    ).order_by("-fecha")
+    apartamentos = Apartamento.objects.filter(propietario=propietario)
+    total_movimientos = movimientos.count()
+    total_entradas = movimientos.filter(tipo="entrada").count()
+    total_salidas = movimientos.filter(tipo="salida").count()
+    esta_en_propiedad = propietario.esta_en_propiedad
+    ultimo_movimiento = movimientos.first() if total_movimientos > 0 else None
+    
+    # deudas = suma cant_adeudo de apartamentos
+    deudas = 0.0
+    for apt in apartamentos:
+        deudas += apt.cant_adeudo
+
+    data = {
+        "propietario": propietario,
+        "movimientos": movimientos,
+        "total_movimientos": total_movimientos,
+        "total_entradas": total_entradas,
+        "total_salidas": total_salidas,
+        "esta_en_propiedad": esta_en_propiedad,
+        "ultimo_movimiento": ultimo_movimiento,
+        "deudas": deudas,
+        "apartamentos": apartamentos,
+    }
+
+    return render(request, "app/propietario/detalle.html", data)
+
+
 def eliminar_propietario(request, dni):
     propietario = get_object_or_404(Propietario, dni=dni)
     propietario.delete()
