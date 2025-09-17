@@ -762,6 +762,21 @@ def exportar_estado_ocupacion_excel(request):
         arrendatarios = apto.arrendatarios.all()
         if convivientes.exists() or arrendatarios.exists():
             for conv in convivientes:
+                movimientos = MovimientoConviviente.objects.filter(
+                    conviviente=conv
+                ).order_by("-fecha")
+                total_movimientos = movimientos.count()
+                utltimo_movimiento = (
+                    movimientos.first() if total_movimientos > 0 else None
+                )
+                tipo_visa = "N/A"
+                if conv.nacionalidad != "CU" and conv.esta_en_propiedad:
+
+                    if utltimo_movimiento.visa:
+                        tipo_visa = utltimo_movimiento.get_tipo_visa_display()
+                    if utltimo_movimiento.residente_inmobiliario:
+                        tipo_visa = "Residente Inmobiliario"
+
                 data.append(
                     {
                         "No. Apto": apto.nombre,
@@ -769,9 +784,7 @@ def exportar_estado_ocupacion_excel(request):
                         "Ocupantes": conv.nombre + " " + conv.apellidos,
                         "No. Identidad": conv.dni,
                         "País": conv.nacionalidad.name,
-                        "Tipo de Visado": (
-                            conv.get_tipo_visa_display() if conv.tipo_visa else "N/A"
-                        ),
+                        "Tipo de Visado": tipo_visa,
                         "Permanencia": (
                             (
                                 "Permanente"
@@ -793,6 +806,21 @@ def exportar_estado_ocupacion_excel(request):
                     }
                 )
             for arr in arrendatarios:
+                movimientos = MovimientoArrendatario.objects.filter(
+                    arrendatario=arr
+                ).order_by("-fecha")
+                total_movimientos = movimientos.count()
+                utltimo_movimiento = (
+                    movimientos.first() if total_movimientos > 0 else None
+                )
+                tipo_visa = "N/A"
+                if arr.nacionalidad != "CU" and arr.esta_en_propiedad:
+
+                    if utltimo_movimiento.visa:
+                        tipo_visa = utltimo_movimiento.get_tipo_visa_display()
+                    if utltimo_movimiento.residente_inmobiliario:
+                        tipo_visa = "Residente Inmobiliario"
+
                 data.append(
                     {
                         "No. Apto": apto.nombre,
@@ -800,9 +828,7 @@ def exportar_estado_ocupacion_excel(request):
                         "Ocupantes": arr.nombre + " " + arr.apellidos,
                         "No. Identidad": arr.dni,
                         "País": arr.nacionalidad.name,
-                        "Tipo de Visado": (
-                            arr.get_tipo_visa_display() if arr.tipo_visa else "N/A"
-                        ),
+                        "Tipo de Visado": tipo_visa,
                         "Permanencia": (
                             (
                                 "Permanente"
@@ -824,6 +850,19 @@ def exportar_estado_ocupacion_excel(request):
                     }
                 )
         else:
+            movimientos = MovimientoPropietario.objects.filter(
+                propietario=propietario
+            ).order_by("-fecha")
+            total_movimientos = movimientos.count()
+            utltimo_movimiento = movimientos.first() if total_movimientos > 0 else None
+            tipo_visa = "N/A"
+            if propietario.nacionalidad != "CU" and propietario.esta_en_propiedad:
+
+                if utltimo_movimiento.visa:
+                    tipo_visa = utltimo_movimiento.get_tipo_visa_display()
+                if utltimo_movimiento.residente_inmobiliario:
+                    tipo_visa = "Residente Inmobiliario"
+
             data.append(
                 {
                     "No. Apto": apto.nombre,
@@ -831,11 +870,7 @@ def exportar_estado_ocupacion_excel(request):
                     "Ocupantes": "N/A",
                     "No. Identidad": propietario.dni,
                     "País": propietario.nacionalidad.name,
-                    "Tipo de Visado": (
-                        propietario.get_tipo_visa_display()
-                        if propietario.tipo_visa
-                        else "N/A"
-                    ),
+                    "Tipo de Visado": tipo_visa,
                     "Permanencia": (
                         (
                             "Permanente"
@@ -897,11 +932,16 @@ def exportar_propietarios_excel(request):
                 "Teléfono": prop.telefono,
                 "Apartamentos": aptos,
                 "Tiene Representante": "Sí" if prop.representante else "No",
-                "Representante Nombre": prop.rep_nombre + " " + prop.rep_apellidos
-                or "N/A",
-                "Representante DNI": prop.rep_dni or "N/A",
-                "Representante Teléfono": prop.rep_telefono or "N/A",
-                "Representante Email": prop.rep_email or "N/A",
+                "Representante Nombre": (
+                    prop.rep_nombre + " " + prop.rep_apellidos
+                    if prop.representante
+                    else "N/A"
+                ),
+                "Representante DNI": prop.rep_dni if prop.representante else "N/A",
+                "Representante Teléfono": (
+                    prop.rep_telefono if prop.representante else "N/A"
+                ),
+                "Representante Email": prop.rep_email if prop.representante else "N/A",
             }
         )
 

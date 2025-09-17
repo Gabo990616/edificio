@@ -64,7 +64,7 @@
                 {% for e in entity %}
                   <tr>
                     <td class="col-text">
-                      <a href="{% url 'detalle_arrendatario' edificio.id e.dni %}" class="">{{ e.nombre }}</a>
+                      <a href="{% url 'detalle_arrendatario' edificio.id e.dni %}" class="">{{ e.nombre }} {{ e.apellidos }}</a>
                     </td>
                     <td class="col-text">{{ e.dni }}</td>
                     <td class="col-text">
