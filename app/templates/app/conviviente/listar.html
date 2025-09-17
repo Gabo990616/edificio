@@ -1,0 +1,100 @@
+{% extends 'app/base.html' %}
+
+{% block js %}
+  <script>
+    function confirmarEliminacion(dni) {
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "{% url 'eliminar_conviviente' 0 %}".replace('/0/', '/' + dni + '/')
+        }
+      })
+    }
+  </script>
+{% endblock %}
+
+{% block breadcrumb %}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">Inicio</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_edificios' %}">Edificios</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <a href="{% url 'detalle_edificio' edificio.id %}">{{ edificio.nombre }}</a>
+      </li>
+      <li class="breadcrumb-item active">Convivientes</li>
+    </ol>
+  </nav>
+{% endblock %}
+{% block contenido %}
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="mb-0"><i class="bi bi-buildings"></i>Listado de Convivientes</h2>
+          <a href="{% url 'adicionar_conviviente' edificio.id %}" class="btn btn-add"><i class="fas fa-user-plus me-1"></i> Añadir Conviviente</a>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover mb-0">
+            <thead>
+              <tr>
+                <th class="col-text">Nombre</th>
+                <th class="col-text">DNI</th>
+                <th class="col-text">Nacionalidad</th>
+                <th class="col-text">Telefono</th>
+                <th class="col-opciones text-center">Opciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if entity %}
+                {% for e in entity %}
+                  <tr>
+                    <td class="col-text">
+                      <a href="{% url 'detalle_conviviente' edificio.id e.dni %}" class="">{{ e.nombre }}</a>
+                    </td>
+                    <td class="col-text">{{ e.dni }}</td>
+                    <td class="col-text">
+                      {% if e.nacionalidad %}
+                        <i class=" {{ e.nacionalidad.flag_css }}"></i>
+                        {{ e.nacionalidad.name }}
+                      {% else %}
+                        <span class="text-muted">No especificado</span>
+                      {% endif %}
+                    </td>
+                    <td class="col-text">{{ e.telefono }}</td>
+                    <td class="col-opciones text-center">
+                      <a href="{% url 'modificar_conviviente' edificio.id e.dni %}" class="btn btn-info btn-sm"><i class="bi bi-pencil"></i></a>
+                      <a href="#" onclick="confirmarEliminacion({{ e.dni }})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                      <a href="{% url 'registrar_movimiento_conviviente' edificio.id e.dni %}" class="btn btn-info btn-sm"><i class="bi bi-calendar-plus"></i></a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" class="empty-row">No hay convivientes disponibles.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-center align-items-center p-3 bg-light">
+          {% include 'app/paginator.html' %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

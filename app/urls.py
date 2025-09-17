@@ -3,19 +3,186 @@ from .views import *
 
 urlpatterns = [
     path("", home, name="home"),
-    path("adicionar_edificio/", adicionar_edificio, name="adicionar_edificio"),
-    path("listar_edificios/", listar_edificios, name="listar_edificios"),
-    path("modificar_edificio/<int:id>/", modificar_edificio, name="modificar_edificio"),
-    path("eliminar_edificio/<int:id>/", eliminar_edificio, name="eliminar_edificio"),
-    path("adicionar_apartamento/", adicionar_apartamento, name="adicionar_apartamento"),
-    path("listar_apartamentos/", listar_apartamentos, name="listar_apartamentos"),
-    path("modificar_apartamento/<int:id>/", modificar_apartamento, name="modificar_apartamento"),
-    path("eliminar_apartamento/<int:id>/", eliminar_apartamento, name="eliminar_apartamento"),
-    path("adicionar_propietario/", adicionar_propietario, name="adicionar_propietario"),
-    path("listar_propietarios/", listar_propietarios, name="listar_propietarios"),
-    path("modificar_propietario/<str:dni>/", modificar_propietario, name="modificar_propietario"),
-    path("detalle_propietario/<str:dni>/", detalle_propietario, name="detalle_propietario"),
-    path("eliminar_propietario/<str:dni>/", eliminar_propietario, name="eliminar_propietario"),
-    path('clear_session_propietario/', clear_session_propietario, name='clear_session_propietario'),
-    path('<str:dni>/movimiento/registrar/', registrar_movimiento_propietario, name='registrar_movimiento_propietario'),
+    path(
+        "adicionar_edificio/",
+        adicionar_edificio,
+        name="adicionar_edificio",
+    ),
+    path(
+        "listar_edificios/",
+        listar_edificios,
+        name="listar_edificios",
+    ),
+    path(
+        "edificio/<int:edificio_id>/",
+        detalle_edificio,
+        name="detalle_edificio",
+    ),
+    path(
+        "modificar_edificio/<int:id>/",
+        modificar_edificio,
+        name="modificar_edificio",
+    ),
+    path(
+        "eliminar_edificio/<int:id>/",
+        eliminar_edificio,
+        name="eliminar_edificio",
+    ),
+    path(
+        "edificio/<int:edificio_id>/adicionar_apartamento/",
+        adicionar_apartamento,
+        name="adicionar_apartamento",
+    ),
+    path(
+        "edificio/<int:edificio_id>/listar_apartamentos_edificio/",
+        listar_apartamentos_edificio,
+        name="listar_apartamentos_edificio",
+    ),
+    path(
+        "edificio/<int:edificio_id>/detalle_apartamento/<int:id>/",
+        detalle_apartamento,
+        name="detalle_apartamento",
+    ),
+    path(
+        "edificio/<int:edificio_id>/modificar_apartamento/<int:id>/",
+        modificar_apartamento,
+        name="modificar_apartamento",
+    ),
+    path(
+        "eliminar_apartamento/<int:id>/",
+        eliminar_apartamento,
+        name="eliminar_apartamento",
+    ),
+    path(
+        "edificio/<int:edificio_id>/adicionar_propietario/",
+        adicionar_propietario,
+        name="adicionar_propietario",
+    ),
+    path(
+        "edificio/<int:edificio_id>/listar_propietarios_edificio/",
+        listar_propietarios_edificio,
+        name="listar_propietarios_edificio",
+    ),
+    path(
+        "edificio/<int:edificio_id>/modificar_propietario/<str:dni>/",
+        modificar_propietario,
+        name="modificar_propietario",
+    ),
+    path(
+        "edificio/<int:edificio_id>/detalle_propietario/<str:dni>/",
+        detalle_propietario,
+        name="detalle_propietario",
+    ),
+    path(
+        "eliminar_propietario/<str:dni>/",
+        eliminar_propietario,
+        name="eliminar_propietario",
+    ),
+    path(
+        "clear_session_propietario/",
+        clear_session_propietario,
+        name="clear_session_propietario",
+    ),
+    path(
+        "edificio/<int:edificio_id>/propietario/<str:dni>/movimiento/registrar/",
+        registrar_movimiento_propietario,
+        name="registrar_movimiento_propietario",
+    ),
+    # arrendatarios
+    path(
+        "edificio/<int:edificio_id>/adicionar_arrendatario/",
+        adicionar_arrendatario,
+        name="adicionar_arrendatario",
+    ),
+    path(
+        "edificio/<int:edificio_id>/listar_arrendatarios_edificio/",
+        listar_arrendatarios_edificio,
+        name="listar_arrendatarios_edificio",
+    ),
+    path(
+        "edificio/<int:edificio_id>/modificar_arrendatario/<str:dni>/",
+        modificar_arrendatario,
+        name="modificar_arrendatario",
+    ),
+    path(
+        "edificio/<int:edificio_id>/detalle_arrendatario/<str:dni>/",
+        detalle_arrendatario,
+        name="detalle_arrendatario",
+    ),
+    path(
+        "eliminar_arrendatario/<str:dni>/",
+        eliminar_arrendatario,
+        name="eliminar_arrendatario",
+    ),
+    path(
+        "clear_session_arrendatario/",
+        clear_session_arrendatario,
+        name="clear_session_arrendatario",
+    ),
+    path(
+        "edificio/<int:edificio_id>/arrendatario/<str:dni>/movimiento/registrar/",
+        registrar_movimiento_arrendatario,
+        name="registrar_movimiento_arrendatario",
+    ),
+    # conviviente
+    path(
+        "edificio/<int:edificio_id>/adicionar_conviviente/",
+        adicionar_conviviente,
+        name="adicionar_conviviente",
+    ),
+    path(
+        "edificio/<int:edificio_id>/listar_convivientes_edificio/",
+        listar_convivientes_edificio,
+        name="listar_convivientes_edificio",
+    ),
+    path(
+        "edificio/<int:edificio_id>/modificar_conviviente/<str:dni>/",
+        modificar_conviviente,
+        name="modificar_conviviente",
+    ),
+    path(
+        "edificio/<int:edificio_id>/detalle_conviviente/<str:dni>/",
+        detalle_conviviente,
+        name="detalle_conviviente",
+    ),
+    path(
+        "eliminar_conviviente/<str:dni>/",
+        eliminar_conviviente,
+        name="eliminar_conviviente",
+    ),
+    path(
+        "clear_session_conviviente/",
+        clear_session_conviviente,
+        name="clear_session_conviviente",
+    ),
+    path(
+        "edificio/<int:edificio_id>/conviviente/<str:dni>/movimiento/registrar/",
+        registrar_movimiento_conviviente,
+        name="registrar_movimiento_conviviente",
+    ),
+    path(
+        "edificio/<int:edificio_id>/exportaciones/",
+        panel_exportaciones,
+        name="panel_exportaciones",
+    ),
+    path(
+        "exportar-propietarios-excel/",
+        exportar_propietarios_excel,
+        name="exportar_propietarios_excel",
+    ),
+    path(
+        "exportar_estado_ocupacion_excel/",
+        exportar_estado_ocupacion_excel,
+        name="exportar_estado_ocupacion_excel",
+    ),
+    path(
+        "exportar_deuda_aptos_excel/",
+        exportar_deuda_aptos_excel,
+        name="exportar_deuda_aptos_excel",
+    ),
+    path(
+        "exportar_deuda_propietarios_excel/",
+        exportar_deuda_propietarios_excel,
+        name="exportar_deuda_propietarios_excel",
+    ),
 ]

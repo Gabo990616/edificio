@@ -1,5 +1,39 @@
 {% extends 'app/base.html' %}
+{% load static %}
 
 {% block contenido %}
-  <h2>Home Page</h2>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 text-center">
+        <div class="card shadow-lg border-0">
+          <div class="card-body p-5">
+            <i class="fas fa-building fa-5x text-primary mb-4"></i>
+            <h1 class="display-4 mb-3">Sistema de Gestión de Registro de Ocupación</h1>
+            <h3 >Bienvenido</h3>
+
+            <div class="row mt-5">
+              <div class="col-md-12">
+                <div class="card bg-light">
+                  <div class="card-body">
+                    <h4 class="card-title">¿Cómo empezar?</h4>
+                    <ol class="text-start">
+                      <li>
+                        Selecciona <strong>Edificios</strong> en el menú lateral
+                      </li>
+                      <li>Elige un edificio de la lista</li>
+                      <li>Gestiona los apartamentos, propietarios y demás de ese edificio</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5">
+              <a href="{% url 'listar_edificios' %}" class="btn btn-primary btn-lg"><i class="fas fa-building me-2"></i>Ver Edificios</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

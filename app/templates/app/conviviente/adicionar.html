@@ -1,0 +1,79 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block breadcrumb %}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">Inicio</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_edificios' %}">Edificios</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <a href="{% url 'detalle_edificio' edificio.id %}">{{ edificio.nombre }}</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <a href="{% url 'listar_convivientes_edificio' edificio.id %}">Convivientes</a>
+      </li>
+      <li class="breadcrumb-item active">Adicionar Conviviente</li>
+    </ol>
+  </nav>
+{% endblock %}
+{% block contenido %}
+  {% load crispy_forms_tags %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0 rounded-lg">
+          <div class="card-header bg-primary text-white text-center py-4 rounded-top">
+            <h2 class="mb-0"><i class="fas fa-user me-2"></i>Datos del Conviviente</h2>
+          </div>
+          <div class="card-body p-5">
+            <form method="POST">
+              {% csrf_token %}
+              {{ form.nombre|as_crispy_field }}
+              {{ form.apellidos|as_crispy_field }}
+              {{ form.dni|as_crispy_field }}
+              {{ form.nacionalidad|as_crispy_field }}
+              {{ form.telefono|as_crispy_field }}
+              {{ form.correo|as_crispy_field }}
+              {{ form.apartamento|as_crispy_field }}
+              {{ form.observaciones|as_crispy_field }}
+
+              <hr class="my-4" />
+
+              <div class="d-flex justify-content-between mt-4">
+                <a href="{{ return_url }}" class="btn btn-outline-secondary px-4"><i class="fas fa-arrow-left me-2"></i>Cancelar</a>
+                <button type="submit" class="btn btn-primary px-4">
+                  {% if 'apartamento' in return_url %}
+                    <i class="fas fa-save me-2"></i>Guardar y Volver
+                  {% else %}
+                    <i class="fas fa-save me-2"></i>Guardar
+                  {% endif %}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>
+    .form-select {
+      width: 100%;
+      padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #212529;
+      background-color: #fff;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 0.375rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+  </style>
+{% endblock %}
