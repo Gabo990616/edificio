@@ -1,1 +1,3 @@
 app/__pycache__/
+edificio/__pycache__/
+db.sqlite3
