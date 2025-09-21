@@ -23,6 +23,7 @@
 {% block contenido %}
   <div class="container py-4">
     <!-- Header con información del propietario -->
+
     <div class="card mb-4">
       <div class="card-header bg-primary text-white">
         <div class="d-flex justify-content-between align-items-center">
@@ -138,7 +139,27 @@
                     
                     
                     
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     bg-success
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -238,7 +259,27 @@
                     
                     
                     
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     bg-secondary
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -367,6 +408,65 @@
         </div>
       </div>
     </div>
+
+    {% if propietario.representante %}
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+              <i class="fas fa-user me-2"></i>
+              Información del Representante
+            </h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <!-- Columna 1: Información personal -->
+            <div class="col-md-6">
+              <h5 class="border-bottom pb-2">Datos Personales y Contacto</h5>
+              <div class="row mb-2">
+                <div class="col-4">
+                  <strong>Nombre:</strong>
+                </div>
+                <div class="col-8">{{ propietario.rep_nombre }} {{ propietario.rep_apellidos }}</div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-4">
+                  <strong>DNI:</strong>
+                </div>
+                <div class="col-8">{{ propietario.rep_dni }}</div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-4">
+                  <strong>Nacionalidad:</strong>
+                </div>
+                <div class="col-8">
+                  {% if propietario.rep_nacionalidad %}
+                    <i class=" {{ propietario.rep_nacionalidad.flag_css }}"></i>
+                    {{ propietario.rep_nacionalidad.name }}
+                  {% else %}
+                    <span class="text-muted">No especificado</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-4">
+                  <strong>Teléfono:</strong>
+                </div>
+                <div class="col-8">{{ propietario.rep_telefono }}</div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-4">
+                  <strong>Email:</strong>
+                </div>
+                <div class="col-8">{{ propietario.rep_email }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
     <!-- Tarjetas de estadísticas -->
     <div class="row mb-4">
       <div class="col-md-3">
@@ -398,6 +498,16 @@
       </div>
       <div class="col-md-3">
         <div class="card text-center {% if esta_en_propiedad %}
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -495,6 +605,16 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
           {% else %}
             
             
@@ -544,7 +664,27 @@
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             bg-secondary
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -760,7 +900,27 @@
                           
                           
                           
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
                           bg-success
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -900,7 +1060,27 @@
                           
                           
                           
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
                           bg-warning text-dark
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1041,7 +1221,27 @@
                             
                             
                             
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
                             fa-sign-in-alt
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1181,7 +1381,27 @@
                             
                             
                             
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
                             fa-sign-out-alt
+
+
+
+
+
+
+
+
+
+
 
 
 

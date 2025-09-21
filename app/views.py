@@ -164,6 +164,8 @@ def detalle_apartamento(request, edificio_id, id):
 
     # Obtener información relacionada
     propietario = apartamento.propietario
+    arrendatarios = apartamento.arrendatarios.all()
+    convivientes = apartamento.convivientes.all()
     movimientos = (
         propietario.movimientos.all().order_by("-fecha")[:5] if propietario else []
     )
@@ -173,6 +175,8 @@ def detalle_apartamento(request, edificio_id, id):
         "edificio": edificio,
         "propietario": propietario,
         "movimientos": movimientos,
+        "arrendatarios":arrendatarios,
+        "convivientes":convivientes
     }
 
     return render(request, "app/apartamento/detalle.html", context)
