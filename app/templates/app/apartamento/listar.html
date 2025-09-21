@@ -72,7 +72,7 @@
                     <td class="col-number-bool text-center">{{ e.bloque }}</td>
                     <td class="col-number-bool text-center">{{ e.piso }}</td>
                     <td class="col-number-bool text-center">{{ e.cant_habitaciones }}</td>
-                    <td class="col-text">{{ e.propietario }}</td>
+                    <td class="col-text">{{ e.propietario.nombre }} {{ e.propietario.apellidos }}</td>
                     <td class="col-number-bool text-center">
                       {% if e.adeudo %}
                         <span class="badge bg-success badge-boolean">Sí</span>
@@ -82,7 +82,7 @@
                     </td>
                     <td class="col-number-bool text-center">
                       {% if e.valla %}
-                        <span class="badge bg-success badge-boolean">Sí</span>
+                        <span class="badge bg-success badge-boolean">{{e.numero_valla}}</span>
                       {% else %}
                         <span class="badge bg-secondary badge-boolean">No</span>
                       {% endif %}

@@ -90,6 +90,7 @@
                     
                     
                     
+                    
                     bg-success
 
 
@@ -107,7 +108,9 @@
 
 
 
+
                   {% else %}
+                    
                     
                     
                     
@@ -141,9 +144,10 @@
 
 
 
+
                   {% endif %}">
                   {% if apartamento.valla %}
-                    Sí
+                    {{ apartamento.numero_valla }}
                   {% else %}
                     No
                   {% endif %}
@@ -156,6 +160,7 @@
               </div>
               <div class="col-8">
                 <span class="badge {% if apartamento.adeudo %}
+                    
                     
                     
                     
@@ -189,6 +194,7 @@
 
 
 
+
                   {% else %}
                     
                     
@@ -206,7 +212,9 @@
                     
                     
                     
+                    
                     bg-success
+
 
 
 
@@ -342,7 +350,9 @@
                               
                               
                               
+                              
                               bg-success
+
 
 
 
@@ -376,7 +386,9 @@
                               
                               
                               
+                              
                               bg-warning
+
 
 
 
