@@ -35,6 +35,11 @@ class ApartamentoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if self.instance and self.instance.fecha_adeudo:
+            self.initial["fecha_adeudo"] = self.instance.fecha_adeudo.strftime(
+                "%Y-%m-%d"
+            )
+
         # Si el propietario viene en los datos iniciales, hacer el campo readonly
         if "initial" in kwargs and "propietario" in kwargs["initial"]:
             self.fields["propietario"].widget.attrs.update(
