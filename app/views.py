@@ -175,8 +175,8 @@ def detalle_apartamento(request, edificio_id, id):
         "edificio": edificio,
         "propietario": propietario,
         "movimientos": movimientos,
-        "arrendatarios":arrendatarios,
-        "convivientes":convivientes
+        "arrendatarios": arrendatarios,
+        "convivientes": convivientes,
     }
 
     return render(request, "app/apartamento/detalle.html", context)
@@ -256,7 +256,7 @@ def adicionar_propietario(request, edificio_id):
 
 def listar_propietarios_edificio(request, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    propietarios = Propietario.objects.all()
+    propietarios = Propietario.objects.all().order_by("nombre", "apellidos")
     page = request.GET.get("page", 1)
     try:
         paginator = Paginator(propietarios, 10)
@@ -474,7 +474,9 @@ def adicionar_arrendatario(request, edificio_id):
 
 def listar_arrendatarios_edificio(request, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    arrendatarios = Arrendatario.objects.all()
+    arrendatarios = Arrendatario.objects.all().order_by(
+        "apartamento", "nombre", "apellidos"
+    )
     page = request.GET.get("page", 1)
     try:
         paginator = Paginator(arrendatarios, 10)
@@ -633,7 +635,9 @@ def adicionar_conviviente(request, edificio_id):
 
 def listar_convivientes_edificio(request, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    convivientes = Conviviente.objects.all()
+    convivientes = Conviviente.objects.all().order_by(
+        "apartamento", "nombre", "apellidos"
+    )
     page = request.GET.get("page", 1)
     try:
         paginator = Paginator(convivientes, 10)
