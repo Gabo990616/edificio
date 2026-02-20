@@ -79,7 +79,7 @@ class Propietario(models.Model):
     rep_telefono = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
-        return self.nombre
+        return self.nombre + " " + self.apellidos
 
     @property
     def ultima_entrada(self):

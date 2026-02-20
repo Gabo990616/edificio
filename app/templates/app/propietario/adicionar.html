@@ -19,6 +19,25 @@
     </ol>
   </nav>
 {% endblock %}
+{% block breadcrumb %}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">Inicio</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_edificios' %}">Edificios</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <a href="{% url 'detalle_edificio' edificio.id %}">{{ edificio.nombre }}</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <a href="{% url 'listar_propietarios_edificio' edificio.id %}">Propietarios</a>
+      </li>
+      <li class="breadcrumb-item active">Adicionar Propietario</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block contenido %}
   {% load crispy_forms_tags %}
   <div class="container py-5">
@@ -30,7 +49,29 @@
           </div>
           <div class="card-body p-5">
             <form method="POST" id="propietarioForm">
+            <form method="POST" id="propietarioForm">
               {% csrf_token %}
+
+              {{ form.nombre|as_crispy_field }}
+              {{ form.apellidos|as_crispy_field }}
+              {{ form.dni|as_crispy_field }}
+              {{ form.nacionalidad|as_crispy_field }}
+              {{ form.telefono|as_crispy_field }}
+              {{ form.correo|as_crispy_field }}
+              {{ form.observaciones|as_crispy_field }}
+              {% comment %}Representante{% endcomment %}
+              <div class="form-group">
+                {{ form.representante|as_crispy_field }}
+                {% if form.representante.errors %}
+                  <div class="text-danger">{{ form.representante.errors }}</div>
+                {% endif %}
+              </div>
+              <div id="representante_group" style="display: none;">{{ form.rep_nombre|as_crispy_field }}
+                {{ form.rep_apellidos|as_crispy_field }}
+                {{ form.rep_dni|as_crispy_field }}
+                {{ form.rep_nacionalidad|as_crispy_field }}
+                {{ form.rep_email|as_crispy_field }}
+                {{ form.rep_telefono|as_crispy_field }}</div>
 
               {{ form.nombre|as_crispy_field }}
               {{ form.apellidos|as_crispy_field }}
@@ -145,3 +186,4 @@
     })
   </script>
 {% endblock %}
+

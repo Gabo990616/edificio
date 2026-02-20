@@ -185,6 +185,15 @@ class MovimientoBaseForm(forms.ModelForm):
             "residente_inmobiliario",
             "observaciones",
         ]
+        fields = [
+            "fecha",
+            "tipo",
+            "visa",
+            "tipo_visa",
+            "fecha_visa",
+            "residente_inmobiliario",
+            "observaciones",
+        ]
         widgets = {
             "fecha": forms.DateTimeInput(
                 attrs={
@@ -212,6 +221,17 @@ class MovimientoBaseForm(forms.ModelForm):
         labels = {
             "fecha_visa": "Fecha de expedición de la visa",
             "tipo_visa": "Tipo de visa",
+            "fecha_visa": forms.DateInput(
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                    "placeholder": "Seleccione una fecha",
+                }
+            ),
+        }
+        labels = {
+            "fecha_visa": "Fecha de expedición de la visa",
+            "tipo_visa": "Tipo de visa",
         }
 
     def __init__(self, *args, **kwargs):
@@ -219,6 +239,53 @@ class MovimientoBaseForm(forms.ModelForm):
         # Formatear la fecha para el input datetime-local
         if self.instance and self.instance.fecha:
             self.initial["fecha"] = self.instance.fecha.strftime("%Y-%m-%dT%H:%M")
+
+        self.fields["tipo_visa"].required = False
+        self.fields["fecha_visa"].required = False
+
+        if self.instance and self.instance.visa:
+            self.fields["tipo_visa"].required = True
+            self.fields["fecha_visa"].required = True
+
+        if self.instance and self.instance.residente_inmobiliario:
+            self.fields["tipo_visa"].required = False
+            self.fields["fecha_visa"].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        visa = cleaned_data.get("visa")
+        tipo_visa = cleaned_data.get("tipo_visa")
+        fecha_visa = cleaned_data.get("fecha_visa")
+        residente_inmobiliario = cleaned_data.get("residente_inmobiliario")
+
+        if visa and residente_inmobiliario:
+            self.add_error(
+                "visa",
+                "No puede seleccionar ambas opciones: 'Posee visa' y 'Residente Inmobiliario'.",
+            )
+            self.add_error(
+                "residente_inmobiliario",
+                "No puede seleccionar ambas opciones: 'Posee visa' y 'Residente Inmobiliario'.",
+            )
+        if visa:
+            if not tipo_visa:
+                self.add_error("tipo_visa", "Debe especificar el tipo de visa")
+                cleaned_data["residente_inmobiliario"] = False
+            if not fecha_visa:
+                self.add_error(
+                    "fecha_visa", "Debe especificar la fecha de expedicion de la visa"
+                )
+                cleaned_data["residente_inmobiliario"] = False
+        else:
+            cleaned_data["tipo_visa"] = None
+            cleaned_data["fecha_visa"] = None
+
+        if residente_inmobiliario:
+            cleaned_data["tipo_visa"] = None
+            cleaned_data["fecha_visa"] = None
+            cleaned_data["visa"] = False
+
+        return cleaned_data
 
         self.fields["tipo_visa"].required = False
         self.fields["fecha_visa"].required = False

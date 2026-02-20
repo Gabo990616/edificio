@@ -20,10 +20,30 @@
     </ol>
   </nav>
 {% endblock %}
+{% block breadcrumb %}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">Inicio</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_edificios' %}">Edificios</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'detalle_edificio' edificio.id %}">{{ edificio.nombre }}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_propietarios_edificio' edificio.id %}">Propietarios</a>
+      </li>
+      <li class="breadcrumb-item active">{{ propietario.nombre }}</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block contenido %}
   <pre>{{ ultimo_movimiento|pprint }}</pre>
   <div class="container py-4">
     <!-- Header con información del propietario -->
+
     <div class="card mb-4">
       <div class="card-header bg-primary text-white">
         <div class="d-flex justify-content-between align-items-center">
@@ -34,6 +54,8 @@
           <div>
             <a href="{% url 'modificar_propietario' edificio.id propietario.dni %}" class="btn btn-light btn-sm me-2"><i class="fas fa-edit me-1"></i> Editar</a>
             <a href="{% url 'listar_propietarios_edificio' edificio.id %}" class="btn btn-light btn-sm"><i class="fas fa-arrow-left me-1"></i> Volver</a>
+            <a href="{% url 'modificar_propietario' edificio.id propietario.dni %}" class="btn btn-light btn-sm me-2"><i class="fas fa-edit me-1"></i> Editar</a>
+            <a href="{% url 'listar_propietarios_edificio' edificio.id %}" class="btn btn-light btn-sm"><i class="fas fa-arrow-left me-1"></i> Volver</a>
           </div>
         </div>
       </div>
@@ -42,11 +64,12 @@
           <!-- Columna 1: Información personal -->
           <div class="col-md-6">
             <h5 class="border-bottom pb-2">Datos Personales y Contacto</h5>
+            <h5 class="border-bottom pb-2">Datos Personales y Contacto</h5>
             <div class="row mb-2">
               <div class="col-4">
                 <strong>Nombre:</strong>
               </div>
-              <div class="col-8">{{ propietario.nombre }}</div>
+              <div class="col-8">{{ propietario.nombre }} {{ propietario.apellidos }}</div>
             </div>
             <div class="row mb-2">
               <div class="col-4">
@@ -57,6 +80,14 @@
             <div class="row mb-2">
               <div class="col-4">
                 <strong>Nacionalidad:</strong>
+              </div>
+              <div class="col-8">
+                {% if propietario.nacionalidad %}
+                  <i class=" {{ propietario.nacionalidad.flag_css }}"></i>
+                  {{ propietario.nacionalidad.name }}
+                {% else %}
+                  <span class="text-muted">No especificado</span>
+                {% endif %}
               </div>
               <div class="col-8">
                 {% if propietario.nacionalidad %}
@@ -79,6 +110,11 @@
               </div>
               <div class="col-8">{{ propietario.correo }}</div>
             </div>
+          </div>
+
+          <!-- Columna 2: Información de contacto y estado -->
+          <div class="col-md-6">
+            <h5 class="border-bottom pb-2">Estado</h5>
           </div>
 
           <!-- Columna 2: Información de contacto y estado -->
@@ -277,7 +313,11 @@
                   {% if not tiene_movimientos %}
                     <i class="fas fa-question-circle me-1"></i> Desconocido
                   {% elif esta_en_propiedad %}
+                  {% if not tiene_movimientos %}
+                    <i class="fas fa-question-circle me-1"></i> Desconocido
+                  {% elif esta_en_propiedad %}
                     <i class="fas fa-check-circle me-1"></i> En el país
+                  {% elif tiene_movimientos and not esta_en_propiedad %}
                   {% elif tiene_movimientos and not esta_en_propiedad %}
                     <i class="fas fa-times-circle me-1"></i> Fuera del país
                   {% endif %}
@@ -324,6 +364,33 @@
               {% endif %}
             {% endif %}
 
+            {% if esta_en_propiedad %}
+              <div class="row mb-2">
+                <div class="col-4">
+                  {% if ultimo_movimiento.visa %}
+                    <strong>Tipo de Visa:</strong>
+                  {% elif ultimo_movimiento.residente_inmobiliario %}
+                    <strong>Residente inmobiliario:</strong>
+                  {% endif %}
+                </div>
+                {% if ultimo_movimiento.visa %}
+                  <div class="col-8">{{ ultimo_movimiento.get_tipo_visa_display }}</div>
+                {% elif ultimo_movimiento.residente_inmobiliario %}
+                  <div class="col-8">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                {% endif %}
+              </div>
+              {% if ultimo_movimiento.visa %}
+                <div class="row mb-2">
+                  <div class="col-4">
+                    <strong>Fecha de expedición:</strong>
+                  </div>
+                  <div class="col-8">{{ ultimo_movimiento.fecha_visa|date:'d/m/Y' }}</div>
+                </div>
+              {% endif %}
+            {% endif %}
+
             <div class="row mb-2">
               <div class="col-4">
                 <strong>Deudas:</strong>
@@ -343,7 +410,9 @@
               <div class="col-8">
                 {% if apartamentos %}
                   {{ apartamentos.count }}
+                  {{ apartamentos.count }}
                 {% else %}
+                  Sin aptos
                   Sin aptos
                 {% endif %}
               </div>
@@ -572,8 +641,15 @@
                 Sí
               {% elif tiene_movimientos and not esta_en_propiedad %}
                 No
+              {% if not tiene_movimientos %}
+                Desconocido
+              {% elif esta_en_propiedad %}
+                Sí
+              {% elif tiene_movimientos and not esta_en_propiedad %}
+                No
               {% endif %}
             </h3>
+            <p class="card-text">En el País</p>
             <p class="card-text">En el País</p>
           </div>
         </div>
@@ -630,8 +706,59 @@
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+          <i class="fas fa-home me-2"></i>
+          Propiedades
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if apartamentos %}
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th class="col-text">Nombre</th>
+                  <th class="col-number-bool text-center">Bloque</th>
+                  <th class="col-number-bool text-center">Piso</th>
+                  <th class="col-number-bool text-center">Cant Habit</th>
+                  <th class="col-number-bool text-center">Deuda</th>
+                  <th class="col-number-bool text-center">Valla</th>
+                  <th class="col-opciones text-center">Opciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for apto in apartamentos %}
+                  <tr>
+                    <td class="col-text">{{ apto.nombre }}</td>
+                    <td class="col-number-bool text-center">{{ apto.bloque }}</td>
+                    <td class="col-number-bool text-center">{{ apto.piso }}</td>
+                    <td class="col-number-bool text-center">{{ apto.cant_habitaciones }}</td>
+                    <td class="col-number-bool text-center">{{ apto.cant_adeudo|default:'-' }}</td>
+                    <td class="col-number-bool text-center">{{ apto.numero_valla|default:'-' }}</td>
+                    <td class="col-opciones text-center">
+                      <a href="{% url 'modificar_apartamento' edificio.id apto.id %}" class="btn btn-info btn-sm"><i class="bi bi-pencil"></i></a>
+                      <a href="#" onclick="confirmarEliminacion({{ apto.id }})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4">
+            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No hay propiedades registradas</p>
+            <a href="{% url 'adicionar_apartamento' edificio.id %}?propietario={{ propietario.dni }}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Adicionar Primer Apartamento</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
     <!-- Botones de acción -->
     <div class="d-flex gap-2 mb-4">
+      <a href="{% url 'registrar_movimiento_propietario' edificio.id propietario.dni %}" class="btn btn-primary"><i class="fas fa-calendar-plus me-1"></i> Registrar Movimiento</a>
       <a href="{% url 'registrar_movimiento_propietario' edificio.id propietario.dni %}" class="btn btn-primary"><i class="fas fa-calendar-plus me-1"></i> Registrar Movimiento</a>
     </div>
 
@@ -1205,6 +1332,7 @@
             <i class="fas fa-history fa-3x text-muted mb-3"></i>
             <p class="text-muted">No hay movimientos registrados</p>
             <a href="{% url 'registrar_movimiento_propietario' edificio.id propietario.dni %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Registrar Primer Movimiento</a>
+            <a href="{% url 'registrar_movimiento_propietario' edificio.id propietario.dni %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Registrar Primer Movimiento</a>
           </div>
         {% endif %}
       </div>
@@ -1221,6 +1349,9 @@
       padding: 0.5em 0.8em;
     }
   </style>
+  <script>
+    //print ultimo_movimiento
+  </script>
   <script>
     //print ultimo_movimiento
   </script>
