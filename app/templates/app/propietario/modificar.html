@@ -1,5 +1,25 @@
 {% extends 'app/base.html' %}
 {% load static %}
+
+{% block breadcrumb %}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">Inicio</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_edificios' %}">Edificios</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'detalle_edificio' edificio.id %}">{{ edificio.nombre }}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_propietarios_edificio' edificio.id %}">Propietarios</a>
+      </li>
+      <li class="breadcrumb-item active">Modificar {{ propietario.nombre }}</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block contenido %}
   {% load crispy_forms_tags %}
   <div class="container py-5">
@@ -12,12 +32,32 @@
           <div class="card-body p-5">
             <form method="POST">
               {% csrf_token %}
-              {{ form|crispy }}
+
+              {{ form.nombre|as_crispy_field }}
+              {{ form.apellidos|as_crispy_field }}
+              {{ form.dni|as_crispy_field }}
+              {{ form.nacionalidad|as_crispy_field }}
+              {{ form.telefono|as_crispy_field }}
+              {{ form.correo|as_crispy_field }}
+              {{ form.observaciones|as_crispy_field }}
+              {% comment %}Representante{% endcomment %}
+              <div class="form-group">
+                {{ form.representante|as_crispy_field }}
+                {% if form.representante.errors %}
+                  <div class="text-danger">{{ form.representante.errors }}</div>
+                {% endif %}
+              </div>
+              <div id="representante_group" style="display: none;">{{ form.rep_nombre|as_crispy_field }}
+                {{ form.rep_apellidos|as_crispy_field }}
+                {{ form.rep_dni|as_crispy_field }}
+                {{ form.rep_nacionalidad|as_crispy_field }}
+                {{ form.rep_email|as_crispy_field }}
+                {{ form.rep_telefono|as_crispy_field }}</div>
 
               <hr class="my-4" />
 
               <div class="d-flex justify-content-between mt-4">
-                <a href="{% url 'listar_propietarios' %}" class="btn btn-outline-secondary px-4"><i class="fas fa-arrow-left me-2"></i>Cancelar</a>
+                <a href="{% url 'listar_propietarios_edificio' edificio.id %}" class="btn btn-outline-secondary px-4"><i class="fas fa-arrow-left me-2"></i>Cancelar</a>
                 <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>Modificar</button>
               </div>
             </form>
@@ -31,4 +71,80 @@
       </div>
     </div>
   </div>
+  <style>
+    .form-select {
+      width: 100%;
+      padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #212529;
+      background-color: #fff;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 0.375rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    #representante_group {
+      transition: all 0.3s ease;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      border-left: 4px solid #dc3545;
+      margin-bottom: 20px;
+    }
+    
+    #representante_group .form-control {
+      background-color: white;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const representanteCheckbox = document.getElementById('{{ form.representante.id_for_label }}')
+      const representanteGroup = document.getElementById('representante_group')
+      const nombreRepInput = document.getElementById('{{ form.rep_nombre.id_for_label }}')
+      const apellidosRepInput = document.getElementById('{{ form.rep_apellidos.id_for_label }}')
+      const dniRepInput = document.getElementById('{{ form.rep_dni.id_for_label }}')
+      const nacionalidadRepInput = document.getElementById('{{ form.rep_nacionalidad.id_for_label }}')
+      const emailRepInput = document.getElementById('{{ form.rep_email.id_for_label }}')
+      const telefonoRepInput = document.getElementById('{{ form.rep_telefono.id_for_label }}')
+    
+      function toggleRepresentanteField() {
+        if (representanteCheckbox.checked) {
+          representanteGroup.style.display = 'block'
+          nombreRepInput.setAttribute('required', 'required')
+          apellidosRepInput.setAttribute('required', 'required')
+          dniRepInput.setAttribute('required', 'required')
+          nacionalidadRepInput.setAttribute('required', 'required')
+          emailRepInput.setAttribute('required', 'required')
+          telefonoRepInput.setAttribute('required', 'required')
+        } else {
+          representanteGroup.style.display = 'none'
+          nombreRepInput.removeAttribute('required')
+          nombreRepInput.value = ''
+          apellidosRepInput.removeAttribute('required')
+          apellidosRepInput.value = ''
+          dniRepInput.removeAttribute('required')
+          dniRepInput.value = ''
+          nacionalidadRepInput.removeAttribute('required')
+          nacionalidadRepInput.value = ''
+          emailRepInput.removeAttribute('required')
+          emailRepInput.value = ''
+          telefonoRepInput.removeAttribute('required')
+          telefonoRepInput.value = ''
+        }
+      }
+    
+      // Event listener para el checkbox
+      representanteCheckbox.addEventListener('change', toggleRepresentanteField)
+    
+      // Estado inicial
+      toggleRepresentanteField()
+    
+      // Validación antes de enviar el formulario
+    })
+  </script>
 {% endblock %}

@@ -1,5 +1,25 @@
 {% extends 'app/base.html' %}
 {% load static %}
+
+{% block breadcrumb %}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">Inicio</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_edificios' %}">Edificios</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <a href="{% url 'detalle_edificio' edificio.id %}">{{ edificio.nombre }}</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <a href="{% url 'listar_apartamentos_edificio' edificio.id %}">Apartamentos</a>
+      </li>
+      <li class="breadcrumb-item active">Adicionar Apartamento</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block contenido %}
   {% load crispy_forms_tags %}
   <div class="container py-5">
@@ -7,36 +27,66 @@
       <div class="col-12 col-md-8 col-lg-8">
         <div class="card shadow-lg border-0 rounded-lg">
           <div class="card-header bg-primary text-white text-center py-4 rounded-top">
-            <h2 class="mb-0"><i class="fas fa-building me-2"></i>Datos del Apartamento</h2>
+            <h2 class="mb-0">
+              <i class="fas fa-building me-2"></i>
+              {% if form.initial.propietario %}
+                Añadir Apartamento para {{ form.initial.propietario.nombre }}
+              {% else %}
+                Añadir Nuevo Apartamento
+              {% endif %}
+            </h2>
           </div>
           <div class="card-body p-5">
-            <form method="POST">
+            <form method="POST" id="apartamentoForm">
               {% csrf_token %}
+              {{ form.nombre|as_crispy_field }}
+              {{ form.bloque|as_crispy_field }}
+              {{ form.piso|as_crispy_field }}
+              {{ form.cant_habitaciones|as_crispy_field }}
+              <div class="form-group">
+                {{ form.adeudo|as_crispy_field }}
+                {% if form.adeudo.errors %}
+                  <div class="text-danger">{{ form.adeudo.errors }}</div>
+                {% endif %}
+              </div>
 
-              <!-- Resto de los campos con crispy -->
-              {% for field in form %}
-                {% if field.name != 'propietario' %}
-                  {{ field|as_crispy_field }}
-                {% else %}
-                  <!-- Campo personalizado para propietario con estilo crispy -->
-                  <div class="form-group mb-4">
-                    <label for="{{ form.propietario.id_for_label }}" class="form-label">Propietario *</label>
-                    {{ form.propietario }}
-                    <div class="mt-2">
-                      <a href="{% url 'adicionar_propietario' %}?return_url={{ request.path }}" class="btn btn-outline-primary btn-sm" type="button"><i class="fas fa-plus me-1"></i> Nuevo Propietario</a>
-                    </div>
-                    {% if form.propietario.errors %}
-                      <div class="text-danger mt-1">{{ form.propietario.errors }}</div>
-                    {% endif %}
-                    <small class="form-text text-muted">Si no encuentra el propietario, haga clic en "Nuevo Propietario"</small>
+              <!-- Campo de cantidad de adeudo (condicional) -->
+              <div id="cant_adeudo_group" style="display: none;">{{ form.cant_adeudo|as_crispy_field }}
+                {{ form.fecha_adeudo|as_crispy_field }}</div>
+              <div class="form-group">
+                {{ form.valla|as_crispy_field }}
+                {% if form.valla.errors %}
+                  <div class="text-danger">{{ form.valla.errors }}</div>
+                {% endif %}
+              </div>
+              <div id="numero_valla_group" style="display: none;">{{ form.numero_valla|as_crispy_field }}</div>
+              {{ form.mandato|as_crispy_field }}
+              <div class="form-group mb-4">
+                <label for="{{ form.propietario.id_for_label }}" class="form-label">Propietario*</label>
+                {{ form.propietario }}
+
+                {% if not form.initial.propietario %}
+                  <div class="mt-2">
+                    <a href="{% url 'adicionar_propietario' edificio.id %}?return_url={{ request.path }}" class="btn btn-outline-primary btn-sm" type="button"><i class="fas fa-plus me-1"></i> Nuevo Propietario</a>
                   </div>
                 {% endif %}
-              {% endfor %}
+                {% if form.propietario.errors %}
+                  <div class="text-danger mt-1">{{ form.propietario.errors }}</div>
+                {% endif %}
+                {% if form.initial.propietario %}
+                  <small class="form-text text-success">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Propietario pre-seleccionado desde el perfil
+                  </small>
+                {% else %}
+                  <small class="form-text text-muted">Si no encuentra el propietario, haga clic en "Nuevo Propietario"</small>
+                {% endif %}
+              </div>
 
               <hr class="my-4" />
 
               <div class="d-flex justify-content-between mt-4">
-                <a href="{% url 'listar_apartamentos' %}" class="btn btn-outline-secondary px-4"><i class="fas fa-arrow-left me-2"></i>Cancelar</a>
+                <a href="{% url 'listar_apartamentos_edificio' edificio.id %}" class="btn btn-outline-secondary px-4"><i class="fas fa-arrow-left me-2"></i>Cancelar</a>
                 <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>Guardar</button>
               </div>
             </form>
@@ -69,9 +119,104 @@
       outline: 0;
       box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
+    select[readonly] {
+      background-color: #f8f9fa !important;
+      pointer-events: none;
+    }
+    .bg-light {
+      background-color: #f8f9fa !important;
+    }
+    
+    #cant_adeudo_group {
+      transition: all 0.3s ease;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      border-left: 4px solid #dc3545;
+      margin-bottom: 20px;
+    }
+    
+    #cant_adeudo_group .form-control {
+      background-color: white;
+    }
+    #numero_valla_group {
+      transition: all 0.3s ease;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      border-left: 4px solid #dc3545;
+      margin-bottom: 20px;
+    }
+    
+    #numero_valla_group .form-control {
+      background-color: white;
+    }
   </style>
 
   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const adeudoCheckbox = document.getElementById('{{ form.adeudo.id_for_label }}')
+      const cantAdeudoGroup = document.getElementById('cant_adeudo_group')
+      const cantAdeudoInput = document.getElementById('{{ form.cant_adeudo.id_for_label }}')
+      const fechaAdeudoInput = document.getElementById('{{ form.fecha_adeudo.id_for_label }}')
+      const vallaCheckbox = document.getElementById('{{ form.valla.id_for_label }}')
+      const numeroVallaGroup = document.getElementById('numero_valla_group')
+      const numeroVallaInput = document.getElementById('{{ form.numero_valla.id_for_label }}')
+      // Función para mostrar/ocultar el campo
+      function toggleAdeudoField() {
+        if (adeudoCheckbox.checked) {
+          cantAdeudoGroup.style.display = 'block'
+          cantAdeudoInput.setAttribute('required', 'required')
+          fechaAdeudoInput.setAttribute('required', 'required')
+        } else {
+          cantAdeudoGroup.style.display = 'none'
+          cantAdeudoInput.removeAttribute('required')
+          cantAdeudoInput.value = ''
+          fechaAdeudoInput.removeAttribute('required')
+          fechaAdeudoInput.value = ''
+        }
+      }
+      function toggleVallaField() {
+        if (vallaCheckbox.checked) {
+          numeroVallaGroup.style.display = 'block'
+          numeroVallaInput.setAttribute('required', 'required')
+        } else {
+          numeroVallaGroup.style.display = 'none'
+          numeroVallaInput.removeAttribute('required')
+          numeroVallaInput.value = ''
+        }
+      }
+      // Event listener para el checkbox
+      adeudoCheckbox.addEventListener('change', toggleAdeudoField)
+      vallaCheckbox.addEventListener('change', toggleVallaField)
+    
+      // Estado inicial
+      toggleAdeudoField()
+      toggleVallaField()
+    
+      // Validación antes de enviar el formulario
+      document.getElementById('apartamentoForm').addEventListener('submit', function (e) {
+        if (adeudoCheckbox.checked) {
+          if (!cantAdeudoInput.value || cantAdeudoInput.value <= 0) {
+            e.preventDefault()
+            alert('Debe especificar la cantidad del adeudo')
+            cantAdeudoInput.focus()
+          }
+          if (!fechaAdeudoInput.value || fechaAdeudoInput.value == 'dd/mm/aaaa') {
+            e.preventDefault()
+            alert('Debe especificar la fecha del adeudo')
+            fechaAdeudoInput.focus()
+          }
+        }
+        if (vallaCheckbox.checked) {
+          if (!numeroVallaInput.value || numeroVallaInput.value <= 0) {
+            e.preventDefault()
+            alert('Debe especificar el número de la valla')
+            numeroVallaInput.focus()
+          }
+        }
+      })
+    })
     document.addEventListener('DOMContentLoaded', function () {
       // Verificar si hay un nuevo propietario en sesión
       const nuevoPropietarioId = "{{ request.session.nuevo_propietario_id|default:'' }}"
@@ -97,6 +242,17 @@
           },
           body: JSON.stringify({})
         })
+      }
+    })
+    document.addEventListener('DOMContentLoaded', function () {
+      // Forzar el campo readonly si tiene valor inicial
+      const propietarioSelect = document.getElementById('id_propietario')
+      const propietarioInicial = "{{ form.initial.propietario|yesno:'true,false' }}"
+      if (propietarioInicial === 'true') {
+        if (propietarioSelect) {
+          propietarioSelect.setAttribute('readonly', 'readonly')
+          propietarioSelect.classList.add('bg-light')
+        }
       }
     })
   </script>

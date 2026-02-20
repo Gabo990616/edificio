@@ -27,7 +27,7 @@
     <div class="card">
       <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
-          <h2 class="mb-0"><i class="bi bi-buildings"></i> Listado de Edificios</h2>
+          <h2 class="mb-0"><i class="bi bi-buildings"></i>Listado de Edificios</h2>
           <a href="{% url 'adicionar_edificio' %}" class="btn btn-add"><i class="bi bi-plus-circle"></i> Añadir Edificio</a>
         </div>
       </div>
@@ -48,7 +48,9 @@
               {% if entity %}
                 {% for e in entity %}
                   <tr>
-                    <td class="col-text">{{ e.nombre }}</td>
+                    <td class="col-text">
+                      <a href="{% url 'detalle_edificio' e.id %}" class="">{{ e.nombre }}</a>
+                    </td>
                     <td class="col-text">{{ e.direccion }}</td>
                     <td class="col-number-bool text-center">{{ e.cant_aptos }}</td>
                     <td class="col-text">{{ e.nombre_admin }}</td>
@@ -60,8 +62,8 @@
                       {% endif %}
                     </td>
                     <td class="col-opciones text-center">
-                      <a href="{% url 'modificar_edificio' e.id %}" class="btn btn-info btn-sm btn-action"><i class="bi bi-pencil"></i> Editar</a>
-                      <a href="#" onclick="confirmarEliminacion({{ e.id }})" class="btn btn-danger btn-sm btn-action"><i class="bi bi-trash"></i> Eliminar</a>
+                      <a href="{% url 'modificar_edificio' e.id %}" class="btn btn-info btn-sm"><i class="bi bi-pencil"></i></a>
+                      <a href="#" onclick="confirmarEliminacion({{ e.id }})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
                     </td>
                   </tr>
                 {% endfor %}

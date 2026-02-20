@@ -22,13 +22,29 @@
   </script>
 {% endblock %}
 
+{% block breadcrumb %}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">Inicio</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'listar_edificios' %}">Edificios</a>
+      </li>
+      <li class="breadcrumb-item active">
+        <a href="{% url 'detalle_edificio' edificio.id %}">{{ edificio.nombre }}</a>
+      </li>
+      <li class="breadcrumb-item active">Apartamentos</li>
+    </ol>
+  </nav>
+{% endblock %}
 {% block contenido %}
   <div class="container">
     <div class="card">
       <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
-          <h2 class="mb-0"><i class="bi bi-buildings"></i> Listado de Apartamentos</h2>
-          <a href="{% url 'adicionar_apartamento' %}" class="btn btn-add"><i class="bi bi-plus-circle"></i> Añadir Apartamento</a>
+          <h2 class="mb-0"><i class="bi bi-buildings"></i>Listado de Apartamentos</h2>
+          <a href="{% url 'adicionar_apartamento' edificio.id %}" class="btn btn-add"><i class="bi bi-plus-circle"></i> Añadir Apartamento</a>
         </div>
       </div>
       <div class="card-body p-0">
@@ -50,7 +66,9 @@
               {% if entity %}
                 {% for e in entity %}
                   <tr>
-                    <td class="col-text">{{ e.nombre }}</td>
+                    <td class="col-text">
+                      <a href="{% url 'detalle_apartamento' edificio.id e.id %}">{{ e.nombre }}</a>
+                    </td>
                     <td class="col-number-bool text-center">{{ e.bloque }}</td>
                     <td class="col-number-bool text-center">{{ e.piso }}</td>
                     <td class="col-number-bool text-center">{{ e.cant_habitaciones }}</td>
@@ -70,8 +88,8 @@
                       {% endif %}
                     </td>
                     <td class="col-opciones text-center">
-                      <a href="{% url 'modificar_apartamento' e.id %}" class="btn btn-info btn-sm btn-action"><i class="bi bi-pencil"></i> Editar</a>
-                      <a href="#" onclick="confirmarEliminacion({{ e.id }})" class="btn btn-danger btn-sm btn-action"><i class="bi bi-trash"></i> Eliminar</a>
+                      <a href="{% url 'modificar_apartamento' edificio.id e.id %}" class="btn btn-info btn-sm"><i class="bi bi-pencil"></i></a>
+                      <a href="#" onclick="confirmarEliminacion({{ e.id }})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
                     </td>
                   </tr>
                 {% endfor %}

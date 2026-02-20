@@ -1,0 +1,6 @@
+app/__pycache__/
+db.sqlite3
+dependencies.zip
+app/static.zip
+dependencies/
+edificio/__pycache__/
