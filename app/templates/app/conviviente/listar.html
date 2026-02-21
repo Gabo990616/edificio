@@ -64,7 +64,7 @@
                 {% for e in entity %}
                   <tr>
                     <td class="col-text">
-                      <a href="{% url 'detalle_conviviente' edificio.id e.dni %}" class="">{{ e.nombre }}</a>
+                      <a href="{% url 'detalle_conviviente' edificio.id e.id %}" class="">{{ e.nombre }}</a>
                     </td>
                     <td class="col-text">{{ e.dni }}</td>
                     <td class="col-text">
@@ -77,9 +77,9 @@
                     </td>
                     <td class="col-text">{{ e.telefono }}</td>
                     <td class="col-opciones text-center">
-                      <a href="{% url 'modificar_conviviente' edificio.id e.dni %}" class="btn btn-info btn-sm"><i class="bi bi-pencil"></i></a>
-                      <a href="#" onclick="confirmarEliminacion({{ e.dni }})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
-                      <a href="{% url 'registrar_movimiento_conviviente' edificio.id e.dni %}" class="btn btn-info btn-sm"><i class="bi bi-calendar-plus"></i></a>
+                      <a href="{% url 'modificar_conviviente' edificio.id e.id %}" class="btn btn-info btn-sm"><i class="bi bi-pencil"></i></a>
+                      <a href="#" onclick="confirmarEliminacion({{ e.id }})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                      <a href="{% url 'registrar_movimiento_conviviente' edificio.id e.id %}" class="btn btn-info btn-sm"><i class="bi bi-calendar-plus"></i></a>
                     </td>
                   </tr>
                 {% endfor %}

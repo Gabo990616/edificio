@@ -48,7 +48,7 @@ class Movimiento(models.Model):
 
 
 class Edificio(models.Model):
-    nombre = models.CharField(max_length=50)
+    nombre = models.CharField(max_length=50, unique=True)
     direccion = models.CharField(max_length=50)
     cant_aptos = models.IntegerField()
     cant_bloques = models.IntegerField()
@@ -64,7 +64,7 @@ class Propietario(models.Model):
 
     nombre = models.CharField(max_length=50)
     apellidos = models.CharField(max_length=50)
-    dni = models.CharField(max_length=50, primary_key=True)
+    dni = models.CharField(max_length=50, unique=True)
     nacionalidad = CountryField(blank=False, default="CU")
     telefono = models.CharField(max_length=50)
     correo = models.EmailField(max_length=50)
@@ -99,6 +99,14 @@ class Propietario(models.Model):
         if not ultima_salida:
             return True
         return ultima_entrada.fecha > ultima_salida.fecha
+
+    @property
+    def tipo_visa(self):
+        if self.esta_en_propiedad:
+            ultima_entrada = self.ultima_entrada
+            if ultima_entrada and ultima_entrada.visa:
+                return ultima_entrada.get_tipo_visa_display()
+        return None
 
     @property
     def tiene_movimientos(self):
@@ -152,7 +160,7 @@ class Arrendatario(models.Model):
 
     nombre = models.CharField(max_length=50)
     apellidos = models.CharField(max_length=50)
-    dni = models.CharField(max_length=50, primary_key=True)
+    dni = models.CharField(max_length=50, unique=True)
     nacionalidad = CountryField(blank=False)
     telefono = models.CharField(max_length=50)
     correo = models.EmailField(max_length=50)
@@ -185,6 +193,14 @@ class Arrendatario(models.Model):
         return ultima_entrada.fecha > ultima_salida.fecha
 
     @property
+    def tipo_visa(self):
+        if self.esta_en_propiedad:
+            ultima_entrada = self.ultima_entrada
+            if ultima_entrada and ultima_entrada.visa:
+                return ultima_entrada.get_tipo_visa_display()
+        return None
+
+    @property
     def tiene_movimientos(self):
         return self.movimientos.exists()
 
@@ -212,7 +228,7 @@ class Conviviente(models.Model):
 
     nombre = models.CharField(max_length=50)
     apellidos = models.CharField(max_length=50)
-    dni = models.CharField(max_length=50, primary_key=True)
+    dni = models.CharField(max_length=50, unique=True)
     nacionalidad = CountryField(blank=False)
     telefono = models.CharField(max_length=50)
     correo = models.EmailField(max_length=50)
@@ -243,6 +259,14 @@ class Conviviente(models.Model):
         if not ultima_salida:
             return True
         return ultima_entrada.fecha > ultima_salida.fecha
+
+    @property
+    def tipo_visa(self):
+        if self.esta_en_propiedad:
+            ultima_entrada = self.ultima_entrada
+            if ultima_entrada and ultima_entrada.visa:
+                return ultima_entrada.get_tipo_visa_display()
+        return None
 
     @property
     def tiene_movimientos(self):

@@ -67,7 +67,7 @@
 
                 {% if not form.initial.propietario %}
                   <div class="mt-2">
-                    <a href="{% url 'adicionar_propietario' edificio.id %}?return_url={{ request.path }}" class="btn btn-outline-primary btn-sm" type="button"><i class="fas fa-plus me-1"></i> Nuevo Propietario</a>
+                    <a href="{% url 'adicionar_propietario' edificio.id %}?return_url={{ request.path }}" id="btnNuevoPropietario" class="btn btn-outline-primary btn-sm" type="button"><i class="fas fa-plus me-1"></i> Nuevo Propietario</a>
                   </div>
                 {% endif %}
                 {% if form.propietario.errors %}
@@ -218,6 +218,31 @@
       })
     })
     document.addEventListener('DOMContentLoaded', function () {
+      // Intercept "Nuevo Propietario" to save current apartment form into session
+      const newPropBtn = document.getElementById('btnNuevoPropietario')
+      if (newPropBtn) {
+        newPropBtn.addEventListener('click', function (ev) {
+          ev.preventDefault()
+          const form = document.getElementById('apartamentoForm')
+          const fd = new FormData(form)
+          const obj = {}
+          fd.forEach((v, k) => { obj[k] = v })
+
+          fetch('{% url "save_session_apartamento" %}', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(obj)
+          }).then(() => {
+            window.location = newPropBtn.href
+          }).catch(() => {
+            // If saving session fails, still navigate so user can continue
+            window.location = newPropBtn.href
+          })
+        })
+      }
       // Verificar si hay un nuevo propietario en sesión
       const nuevoPropietarioId = "{{ request.session.nuevo_propietario_id|default:'' }}"
     

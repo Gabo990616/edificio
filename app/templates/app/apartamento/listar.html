@@ -44,7 +44,10 @@
       <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
           <h2 class="mb-0"><i class="bi bi-buildings"></i>Listado de Apartamentos</h2>
-          <a href="{% url 'adicionar_apartamento' edificio.id %}" class="btn btn-add"><i class="bi bi-plus-circle"></i> Añadir Apartamento</a>
+
+          {% if mostrar_adicionar %}
+            <a href="{% url 'adicionar_apartamento' edificio.id %}" class="btn btn-add"><i class="bi bi-plus-circle"></i> Añadir Apartamento</a>
+          {% endif %}
         </div>
       </div>
       <div class="card-body p-0">
@@ -82,7 +85,7 @@
                     </td>
                     <td class="col-number-bool text-center">
                       {% if e.valla %}
-                        <span class="badge bg-success badge-boolean">{{e.numero_valla}}</span>
+                        <span class="badge bg-success badge-boolean">{{ e.numero_valla }}</span>
                       {% else %}
                         <span class="badge bg-secondary badge-boolean">No</span>
                       {% endif %}

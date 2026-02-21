@@ -59,22 +59,27 @@ urlpatterns = [
         name="adicionar_propietario",
     ),
     path(
+        "save_session_apartamento/",
+        save_session_apartamento,
+        name="save_session_apartamento",
+    ),
+    path(
         "edificio/<int:edificio_id>/listar_propietarios_edificio/",
         listar_propietarios_edificio,
         name="listar_propietarios_edificio",
     ),
     path(
-        "edificio/<int:edificio_id>/modificar_propietario/<str:dni>/",
+        "edificio/<int:edificio_id>/modificar_propietario/<str:propietario_id>/",
         modificar_propietario,
         name="modificar_propietario",
     ),
     path(
-        "edificio/<int:edificio_id>/detalle_propietario/<str:dni>/",
+        "edificio/<int:edificio_id>/detalle_propietario/<str:propietario_id>/",
         detalle_propietario,
         name="detalle_propietario",
     ),
     path(
-        "eliminar_propietario/<str:dni>/",
+        "eliminar_propietario/<str:propietario_id>/",
         eliminar_propietario,
         name="eliminar_propietario",
     ),
@@ -84,7 +89,7 @@ urlpatterns = [
         name="clear_session_propietario",
     ),
     path(
-        "edificio/<int:edificio_id>/propietario/<str:dni>/movimiento/registrar/",
+        "edificio/<int:edificio_id>/propietario/<str:propietario_id>/movimiento/registrar/",
         registrar_movimiento_propietario,
         name="registrar_movimiento_propietario",
     ),
@@ -100,17 +105,17 @@ urlpatterns = [
         name="listar_arrendatarios_edificio",
     ),
     path(
-        "edificio/<int:edificio_id>/modificar_arrendatario/<str:dni>/",
+        "edificio/<int:edificio_id>/modificar_arrendatario/<str:arrendatario_id>/",
         modificar_arrendatario,
         name="modificar_arrendatario",
     ),
     path(
-        "edificio/<int:edificio_id>/detalle_arrendatario/<str:dni>/",
+        "edificio/<int:edificio_id>/detalle_arrendatario/<str:arrendatario_id>/",
         detalle_arrendatario,
         name="detalle_arrendatario",
     ),
     path(
-        "eliminar_arrendatario/<str:dni>/",
+        "eliminar_arrendatario/<str:arrendatario_id>/",
         eliminar_arrendatario,
         name="eliminar_arrendatario",
     ),
@@ -120,7 +125,7 @@ urlpatterns = [
         name="clear_session_arrendatario",
     ),
     path(
-        "edificio/<int:edificio_id>/arrendatario/<str:dni>/movimiento/registrar/",
+        "edificio/<int:edificio_id>/arrendatario/<str:arrendatario_id>/movimiento/registrar/",
         registrar_movimiento_arrendatario,
         name="registrar_movimiento_arrendatario",
     ),
@@ -136,17 +141,17 @@ urlpatterns = [
         name="listar_convivientes_edificio",
     ),
     path(
-        "edificio/<int:edificio_id>/modificar_conviviente/<str:dni>/",
+        "edificio/<int:edificio_id>/modificar_conviviente/<str:conviviente_id>/",
         modificar_conviviente,
         name="modificar_conviviente",
     ),
     path(
-        "edificio/<int:edificio_id>/detalle_conviviente/<str:dni>/",
+        "edificio/<int:edificio_id>/detalle_conviviente/<str:conviviente_id>/",
         detalle_conviviente,
         name="detalle_conviviente",
     ),
     path(
-        "eliminar_conviviente/<str:dni>/",
+        "eliminar_conviviente/<str:conviviente_id>/",
         eliminar_conviviente,
         name="eliminar_conviviente",
     ),
@@ -156,7 +161,7 @@ urlpatterns = [
         name="clear_session_conviviente",
     ),
     path(
-        "edificio/<int:edificio_id>/conviviente/<str:dni>/movimiento/registrar/",
+        "edificio/<int:edificio_id>/conviviente/<str:conviviente_id>/movimiento/registrar/",
         registrar_movimiento_conviviente,
         name="registrar_movimiento_conviviente",
     ),

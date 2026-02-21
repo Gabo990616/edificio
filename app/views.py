@@ -1,17 +1,14 @@
 from datetime import datetime
 from django.http import Http404, HttpResponseRedirect, JsonResponse, HttpResponse
-from datetime import datetime
-from django.http import Http404, HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from .forms import *
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage, InvalidPage
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-import pandas as pd
-from django.db.models import Case, When, Value, BooleanField
 import pandas as pd
 from django.db.models import Case, When, Value, BooleanField
 
@@ -40,37 +37,19 @@ def adicionar_edificio(request):
 
 
 def listar_edificios(request):
-    edificios = Edificio.objects.all()
+    edificios = Edificio.objects.order_by("id")
     page = request.GET.get("page", 1)
+    paginator = Paginator(edificios, 10)
     try:
-        paginator = Paginator(edificios, 10)
         edificios = paginator.page(page)
-    except:
-        raise Http404
+    except (EmptyPage, InvalidPage):
+        edificios = paginator.page(paginator.num_pages)
 
     data = {
         "entity": edificios,
         "paginator": paginator,
     }
     return render(request, "app/edificio/listar.html", data)
-
-
-def detalle_edificio(request, edificio_id):
-    """Vista principal del edificio - dashboard"""
-    edificio = get_object_or_404(Edificio, id=edificio_id)
-
-    # Estadísticas del edificio
-    total_apartamentos = edificio.apartamento_set.count()
-    total_propietarios = (
-        Propietario.objects.filter(apartamentos__edificio=edificio).distinct().count()
-    )
-
-    context = {
-        "edificio": edificio,
-        "total_apartamentos": total_apartamentos,
-        "total_propietarios": total_propietarios,
-    }
-    return render(request, "app/edificio/detalle.html", context)
 
 
 def detalle_edificio(request, edificio_id):
@@ -122,12 +101,8 @@ def apartamentos(request):
 def adicionar_apartamento(request, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
 
-def adicionar_apartamento(request, edificio_id):
-    edificio = get_object_or_404(Edificio, id=edificio_id)
-
     data = {
         "form": ApartamentoForm(),
-        "edificio": edificio,
         "edificio": edificio,
     }
 
@@ -158,17 +133,9 @@ def adicionar_apartamento(request, edificio_id):
             apartamento = formulario.save(commit=False)
             apartamento.edificio = edificio
             apartamento.save()
-            apartamento = formulario.save(commit=False)
-            apartamento.edificio = edificio
-            apartamento.save()
             messages.success(request, "Apartamento agregado correctamente")
             return redirect(to="listar_apartamentos_edificio", edificio_id=edificio.id)
-            return redirect(to="listar_apartamentos_edificio", edificio_id=edificio.id)
         else:
-            print("Errores del formulario:", formulario.errors)  # Debug
-            print("Datos del POST:", request.POST)  # Debug
-            print("Errores del formulario:", formulario.errors)  # Debug
-            print("Datos del POST:", request.POST)  # Debug
             data["form"] = formulario
             messages.error(request, "Por favor, corrige los errores en el formulario")
 
@@ -179,6 +146,7 @@ def listar_apartamentos_edificio(request, edificio_id):
     """Lista apartamentos de un edificio específico"""
     edificio = get_object_or_404(Edificio, id=edificio_id)
     apartamentos = edificio.apartamento_set.all().order_by("bloque", "piso", "nombre")
+    mostrar_adicionar = apartamentos.count() < edificio.cant_aptos
     page = request.GET.get("page", 1)
     try:
         paginator = Paginator(apartamentos, 10)
@@ -190,18 +158,9 @@ def listar_apartamentos_edificio(request, edificio_id):
         "entity": apartamentos,
         "paginator": paginator,
         "edificio": edificio,
-        "edificio": edificio,
+        "mostrar_adicionar": mostrar_adicionar,
     }
-    return render(
-        request,
-        "app/apartamento/listar.html",
-        data,
-    )
-    return render(
-        request,
-        "app/apartamento/listar.html",
-        data,
-    )
+    return render(request, "app/apartamento/listar.html", data)
 
 
 def detalle_apartamento(request, edificio_id, id):
@@ -233,18 +192,12 @@ def modificar_apartamento(request, id, edificio_id):
         "edificio": edificio,
         "apartamento": apartamento,
     }
-    data = {
-        "form": ApartamentoForm(instance=apartamento),
-        "edificio": edificio,
-        "apartamento": apartamento,
-    }
 
     if request.method == "POST":
         formulario = ApartamentoForm(data=request.POST, instance=apartamento)
         if formulario.is_valid():
             formulario.save()
             messages.success(request, "Apartamento modificado correctamente")
-            return redirect(to="listar_apartamentos_edificio", edificio_id=edificio.id)
             return redirect(to="listar_apartamentos_edificio", edificio_id=edificio.id)
         else:
             data["form"] = formulario
@@ -255,27 +208,17 @@ def modificar_apartamento(request, id, edificio_id):
 def eliminar_apartamento(request, id):
     apartamento = get_object_or_404(Apartamento, id=id)
     edificio_id = apartamento.edificio.id
-    edificio_id = apartamento.edificio.id
     apartamento.delete()
     messages.success(request, "Apartamento eliminado correctamente")
     return redirect(to="listar_apartamentos_edificio", edificio_id=edificio_id)
-    return redirect(to="listar_apartamentos_edificio", edificio_id=edificio_id)
 
 
 def adicionar_propietario(request, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-def adicionar_propietario(request, edificio_id):
-    edificio = get_object_or_404(Edificio, id=edificio_id)
-    data = {
-        "form": PropietarioForm(),
-        "edificio": edificio,
-        "edificio": edificio,
-    }
+
+    data = {"form": PropietarioForm(), "edificio": edificio}
 
     # Guardar la URL de retorno (desde donde se llamó al formulario)
-    return_url = request.GET.get(
-        "return_url", reverse("listar_propietarios_edificio", args=[edificio_id])
-    )
     return_url = request.GET.get(
         "return_url", reverse("listar_propietarios_edificio", args=[edificio_id])
     )
@@ -287,26 +230,17 @@ def adicionar_propietario(request, edificio_id):
             propietario = formulario.save(commit=False)
             propietario.edificio = edificio
             propietario.save()
-            propietario = formulario.save(commit=False)
-            propietario.edificio = edificio
-            propietario.save()
 
             # Si viene del formulario de apartamento, guardar datos y redirigir de vuelta
             if "apartamento" in return_url:
-                # Guardar el ID del nuevo propietario para seleccionarlo automáticamente
-                request.session["nuevo_propietario_id"] = propietario.dni
-
+                request.session["nuevo_propietario_id"] = propietario.id
                 messages.success(
                     request,
                     "Propietario agregado correctamente. Continue con el apartamento.",
                 )
                 return redirect(to="adicionar_apartamento", edificio_id=edificio_id)
-                return redirect(to="adicionar_apartamento", edificio_id=edificio_id)
             else:
                 messages.success(request, "Propietario agregado correctamente")
-                return redirect(
-                    to="listar_propietarios_edificio", edificio_id=edificio_id
-                )
                 return redirect(
                     to="listar_propietarios_edificio", edificio_id=edificio_id
                 )
@@ -331,22 +265,14 @@ def listar_propietarios_edificio(request, edificio_id):
         "entity": propietarios,
         "paginator": paginator,
         "edificio": edificio,
-        "edificio": edificio,
     }
     return render(request, "app/propietario/listar.html", data)
 
 
-def modificar_propietario(request, dni, edificio_id):
+def modificar_propietario(request, propietario_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-def modificar_propietario(request, dni, edificio_id):
-    edificio = get_object_or_404(Edificio, id=edificio_id)
-    propietario = get_object_or_404(Propietario, dni=dni)
+    propietario = get_object_or_404(Propietario, id=propietario_id)
 
-    data = {
-        "form": PropietarioForm(instance=propietario),
-        "edificio": edificio,
-        "propietario": propietario,
-    }
     data = {
         "form": PropietarioForm(instance=propietario),
         "edificio": edificio,
@@ -359,40 +285,30 @@ def modificar_propietario(request, dni, edificio_id):
             formulario.save()
             messages.success(request, "Propietario modificado correctamente")
             return redirect(to="listar_propietarios_edificio", edificio_id=edificio.id)
-            return redirect(to="listar_propietarios_edificio", edificio_id=edificio.id)
         else:
             data["form"] = formulario
-    print(data["form"].fields.keys())
-    print(data["form"].fields.keys())
+
     return render(request, "app/propietario/modificar.html", data)
 
 
-def detalle_propietario(request, dni, edificio_id):
+def detalle_propietario(request, propietario_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-def detalle_propietario(request, dni, edificio_id):
-    edificio = get_object_or_404(Edificio, id=edificio_id)
-    propietario = get_object_or_404(Propietario, dni=dni)
+    propietario = get_object_or_404(Propietario, id=propietario_id)
     movimientos = MovimientoPropietario.objects.filter(
         propietario=propietario
     ).order_by("-fecha")
     apartamentos = propietario.apartamentos.all()
-    apartamentos = propietario.apartamentos.all()
+
     total_movimientos = movimientos.count()
     total_entradas = movimientos.filter(tipo="entrada").count()
     total_salidas = movimientos.filter(tipo="salida").count()
     esta_en_propiedad = propietario.esta_en_propiedad
     tiene_movimientos = propietario.tiene_movimientos
-    tiene_movimientos = propietario.tiene_movimientos
     ultimo_movimiento = movimientos.first() if total_movimientos > 0 else None
-    deudas = 0.0
-    for apt in apartamentos:
-        if apt.adeudo:
-            deudas += apt.cant_adeudo
-        if apt.adeudo:
-            deudas += apt.cant_adeudo
+
+    deudas = sum((apt.cant_adeudo or 0) for apt in apartamentos if apt.adeudo)
 
     data = {
-        "edificio": edificio,
         "edificio": edificio,
         "propietario": propietario,
         "movimientos": movimientos,
@@ -400,7 +316,6 @@ def detalle_propietario(request, dni, edificio_id):
         "total_entradas": total_entradas,
         "total_salidas": total_salidas,
         "esta_en_propiedad": esta_en_propiedad,
-        "tiene_movimientos": tiene_movimientos,
         "tiene_movimientos": tiene_movimientos,
         "ultimo_movimiento": ultimo_movimiento,
         "deudas": deudas,
@@ -410,122 +325,35 @@ def detalle_propietario(request, dni, edificio_id):
     return render(request, "app/propietario/detalle.html", data)
 
 
-def exportar_propietarios_excel(request):
-    # Obtener todos los propietarios con sus relaciones
-    propietarios = Propietario.objects.select_related("edificio").all()
-
-    # Preparar los datos para el DataFrame
-    data = []
-    for prop in propietarios:
-        data.append(
-            {
-                "DNI": prop.dni,
-                "Nombre": prop.nombre,
-                "Apellidos": prop.apellidos,
-                "Nacionalidad": prop.nacionalidad,
-                "Residente Inmobiliario": "Sí" if prop.residente_inmobiliario else "No",
-                "Tiene Visa": "Sí" if prop.visa else "No",
-                "Tipo de Visa": (
-                    prop.get_tipo_visa_display() if prop.tipo_visa else "N/A"
-                ),
-                "Teléfono": prop.telefono,
-                "Correo": prop.correo,
-                "Edificio": prop.edificio.nombre if prop.edificio else "N/A",
-                "Observaciones": prop.observaciones,
-                "Es Representante": "Sí" if prop.representante else "No",
-                "Representante Nombre": prop.rep_nombre or "N/A",
-                "Representante Apellidos": prop.rep_apellidos or "N/A",
-                "Representante DNI": prop.rep_dni or "N/A",
-                "Representante Nacionalidad": prop.rep_nacionalidad or "N/A",
-                "Representante Email": prop.rep_email or "N/A",
-                "Representante Teléfono": prop.rep_telefono or "N/A",
-            }
-        )
-
-    # Crear DataFrame
-    df = pd.DataFrame(data)
-
-    # Crear respuesta HTTP
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    response["Content-Disposition"] = 'attachment; filename="propietarios.xlsx"'
-
-    # Exportar a Excel
-    with pd.ExcelWriter(response, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Propietarios", index=False)
-
-        # Autoajustar el ancho de las columnas
-        worksheet = writer.sheets["Propietarios"]
-        for idx, col in enumerate(df.columns):
-            max_length = max(df[col].astype(str).map(len).max(), len(col)) + 2
-            worksheet.column_dimensions[chr(65 + idx)].width = max_length
-
-    return response
+# Note: exportar_propietarios_excel implemented later with desired format
 
 
-def exportar_propietarios_excel(request):
-    # Obtener todos los propietarios con sus relaciones
-    propietarios = Propietario.objects.select_related("edificio").all()
-
-    # Preparar los datos para el DataFrame
-    data = []
-    for prop in propietarios:
-        data.append(
-            {
-                "DNI": prop.dni,
-                "Nombre": prop.nombre,
-                "Apellidos": prop.apellidos,
-                "Nacionalidad": prop.nacionalidad,
-                "Residente Inmobiliario": "Sí" if prop.residente_inmobiliario else "No",
-                "Tiene Visa": "Sí" if prop.visa else "No",
-                "Tipo de Visa": (
-                    prop.get_tipo_visa_display() if prop.tipo_visa else "N/A"
-                ),
-                "Teléfono": prop.telefono,
-                "Correo": prop.correo,
-                "Edificio": prop.edificio.nombre if prop.edificio else "N/A",
-                "Observaciones": prop.observaciones,
-                "Es Representante": "Sí" if prop.representante else "No",
-                "Representante Nombre": prop.rep_nombre or "N/A",
-                "Representante Apellidos": prop.rep_apellidos or "N/A",
-                "Representante DNI": prop.rep_dni or "N/A",
-                "Representante Nacionalidad": prop.rep_nacionalidad or "N/A",
-                "Representante Email": prop.rep_email or "N/A",
-                "Representante Teléfono": prop.rep_telefono or "N/A",
-            }
-        )
-
-    # Crear DataFrame
-    df = pd.DataFrame(data)
-
-    # Crear respuesta HTTP
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    response["Content-Disposition"] = 'attachment; filename="propietarios.xlsx"'
-
-    # Exportar a Excel
-    with pd.ExcelWriter(response, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Propietarios", index=False)
-
-        # Autoajustar el ancho de las columnas
-        worksheet = writer.sheets["Propietarios"]
-        for idx, col in enumerate(df.columns):
-            max_length = max(df[col].astype(str).map(len).max(), len(col)) + 2
-            worksheet.column_dimensions[chr(65 + idx)].width = max_length
-
-    return response
-
-
-def eliminar_propietario(request, dni):
-    propietario = get_object_or_404(Propietario, dni=dni)
-    edificio = propietario.edificio
+def eliminar_propietario(request, propietario_id):
+    propietario = get_object_or_404(Propietario, id=propietario_id)
     edificio = propietario.edificio
     propietario.delete()
     messages.success(request, "Propietario eliminado correctamente")
     return redirect(to="listar_propietarios_edificio", edificio_id=edificio.id)
-    return redirect(to="listar_propietarios_edificio", edificio_id=edificio.id)
+
+
+@csrf_exempt
+@require_POST
+def save_session_apartamento(request):
+    """Save current apartamento form data into session so it can be restored after
+    adding a new Propietario.
+    """
+    import json
+
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        # Fallback to POST dict
+        payload = request.POST.dict()
+
+    # Store the data in session
+    request.session["apartamento_form_data"] = payload
+    request.session.modified = True
+    return JsonResponse({"status": "ok"})
 
 
 @csrf_exempt
@@ -536,11 +364,9 @@ def clear_session_propietario(request):
     return JsonResponse({"status": "ok"})
 
 
-def registrar_movimiento_propietario(request, dni, edificio_id):
+def registrar_movimiento_propietario(request, propietario_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-def registrar_movimiento_propietario(request, dni, edificio_id):
-    edificio = get_object_or_404(Edificio, id=edificio_id)
-    propietario = get_object_or_404(Propietario, dni=dni)
+    propietario = get_object_or_404(Propietario, id=propietario_id)
 
     if request.method == "POST":
         form = MovimientoPropietarioForm(request.POST)
@@ -553,7 +379,6 @@ def registrar_movimiento_propietario(request, dni, edificio_id):
                 request,
                 f"Movimiento registrado correctamente para {propietario.nombre}",
             )
-            return redirect(to="listar_propietarios_edificio", edificio_id=edificio.id)
             return redirect(to="listar_propietarios_edificio", edificio_id=edificio.id)
     else:
         form = MovimientoPropietarioForm(initial={"fecha": timezone.now()})
@@ -593,7 +418,7 @@ def adicionar_arrendatario(request, edificio_id):
             # Si viene del formulario de apartamento, guardar datos y redirigir de vuelta
             if "apartamento" in return_url:
                 # Guardar el ID del nuevo arrendatario para seleccionarlo automáticamente
-                request.session["nuevo_arrendatario_id"] = arrendatario.dni
+                request.session["nuevo_arrendatario_id"] = arrendatario.id
 
                 messages.success(
                     request,
@@ -630,9 +455,9 @@ def listar_arrendatarios_edificio(request, edificio_id):
     return render(request, "app/arrendatario/listar.html", data)
 
 
-def modificar_arrendatario(request, dni, edificio_id):
+def modificar_arrendatario(request, arrendatario_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    arrendatario = get_object_or_404(Arrendatario, dni=dni)
+    arrendatario = get_object_or_404(Arrendatario, id=arrendatario_id)
 
     data = {
         "form": ArrendatarioForm(instance=arrendatario),
@@ -652,9 +477,9 @@ def modificar_arrendatario(request, dni, edificio_id):
     return render(request, "app/arrendatario/modificar.html", data)
 
 
-def detalle_arrendatario(request, dni, edificio_id):
+def detalle_arrendatario(request, arrendatario_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    arrendatario = get_object_or_404(Arrendatario, dni=dni)
+    arrendatario = get_object_or_404(Arrendatario, id=arrendatario_id)
     movimientos = MovimientoArrendatario.objects.filter(
         arrendatario=arrendatario
     ).order_by("-fecha")
@@ -682,8 +507,8 @@ def detalle_arrendatario(request, dni, edificio_id):
     return render(request, "app/arrendatario/detalle.html", data)
 
 
-def eliminar_arrendatario(request, dni):
-    arrendatario = get_object_or_404(Arrendatario, dni=dni)
+def eliminar_arrendatario(request, arrendatario_id):
+    arrendatario = get_object_or_404(Arrendatario, id=arrendatario_id)
     edificio = arrendatario.edificio
     arrendatario.delete()
     messages.success(request, "Arrendatario eliminado correctamente")
@@ -698,9 +523,9 @@ def clear_session_arrendatario(request):
     return JsonResponse({"status": "ok"})
 
 
-def registrar_movimiento_arrendatario(request, dni, edificio_id):
+def registrar_movimiento_arrendatario(request, arrendatario_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    arrendatario = get_object_or_404(Arrendatario, dni=dni)
+    arrendatario = get_object_or_404(Arrendatario, id=arrendatario_id)
 
     if request.method == "POST":
         form = MovimientoArrendatarioForm(request.POST)
@@ -789,9 +614,9 @@ def listar_convivientes_edificio(request, edificio_id):
     return render(request, "app/conviviente/listar.html", data)
 
 
-def modificar_conviviente(request, dni, edificio_id):
+def modificar_conviviente(request, conviviente_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    conviviente = get_object_or_404(Conviviente, dni=dni)
+    conviviente = get_object_or_404(Conviviente, id=conviviente_id)
 
     data = {
         "form": ConvivienteForm(instance=conviviente),
@@ -811,9 +636,9 @@ def modificar_conviviente(request, dni, edificio_id):
     return render(request, "app/conviviente/modificar.html", data)
 
 
-def detalle_conviviente(request, dni, edificio_id):
+def detalle_conviviente(request, conviviente_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    conviviente = get_object_or_404(Conviviente, dni=dni)
+    conviviente = get_object_or_404(Conviviente, id=conviviente_id)
     movimientos = MovimientoConviviente.objects.filter(
         conviviente=conviviente
     ).order_by("-fecha")
@@ -841,8 +666,8 @@ def detalle_conviviente(request, dni, edificio_id):
     return render(request, "app/conviviente/detalle.html", data)
 
 
-def eliminar_conviviente(request, dni):
-    conviviente = get_object_or_404(Conviviente, dni=dni)
+def eliminar_conviviente(request, conviviente_id):
+    conviviente = get_object_or_404(Conviviente, id=conviviente_id)
     edificio = conviviente.edificio
     conviviente.delete()
     messages.success(request, "Conviviente eliminado correctamente")
@@ -857,9 +682,9 @@ def clear_session_conviviente(request):
     return JsonResponse({"status": "ok"})
 
 
-def registrar_movimiento_conviviente(request, dni, edificio_id):
+def registrar_movimiento_conviviente(request, conviviente_id, edificio_id):
     edificio = get_object_or_404(Edificio, id=edificio_id)
-    conviviente = get_object_or_404(Conviviente, dni=dni)
+    conviviente = get_object_or_404(Conviviente, id=conviviente_id)
 
     if request.method == "POST":
         form = MovimientoConvivienteForm(request.POST)
@@ -914,7 +739,7 @@ def exportar_estado_ocupacion_excel(request):
                         "No. Identidad": conv.dni,
                         "País": conv.nacionalidad.name,
                         "Tipo de Visado": (
-                            conv.get_tipo_visa_display() if conv.tipo_visa else "N/A"
+                            conv.tipo_visa if conv.tipo_visa else "N/A"
                         ),
                         "Permanencia": (
                             (
@@ -945,7 +770,7 @@ def exportar_estado_ocupacion_excel(request):
                         "No. Identidad": arr.dni,
                         "País": arr.nacionalidad.name,
                         "Tipo de Visado": (
-                            arr.get_tipo_visa_display() if arr.tipo_visa else "N/A"
+                            arr.tipo_visa if arr.tipo_visa else "N/A"
                         ),
                         "Permanencia": (
                             (
@@ -976,9 +801,7 @@ def exportar_estado_ocupacion_excel(request):
                     "No. Identidad": propietario.dni,
                     "País": propietario.nacionalidad.name,
                     "Tipo de Visado": (
-                        propietario.get_tipo_visa_display()
-                        if propietario.tipo_visa
-                        else "N/A"
+                        propietario.tipo_visa if propietario.tipo_visa else "N/A"
                     ),
                     "Permanencia": (
                         (
@@ -1041,11 +864,16 @@ def exportar_propietarios_excel(request):
                 "Teléfono": prop.telefono,
                 "Apartamentos": aptos,
                 "Tiene Representante": "Sí" if prop.representante else "No",
-                "Representante Nombre": prop.rep_nombre + " " + prop.rep_apellidos
-                or "N/A",
-                "Representante DNI": prop.rep_dni or "N/A",
-                "Representante Teléfono": prop.rep_telefono or "N/A",
-                "Representante Email": prop.rep_email or "N/A",
+                "Representante Nombre": (
+                    (prop.rep_nombre + " " + prop.rep_apellidos)
+                    if prop.representante
+                    else "N/A"
+                ),
+                "Representante DNI": prop.rep_dni if prop.representante else "N/A",
+                "Representante Teléfono": (
+                    prop.rep_telefono if prop.representante else "N/A"
+                ),
+                "Representante Email": prop.rep_email if prop.representante else "N/A",
             }
         )
 

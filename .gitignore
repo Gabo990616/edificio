@@ -4,3 +4,4 @@ dependencies.zip
 app/static.zip
 dependencies/
 edificio/__pycache__/
+app/migrations/
