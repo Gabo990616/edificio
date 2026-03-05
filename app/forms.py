@@ -3,6 +3,15 @@ from .models import *
 from django_countries.widgets import CountrySelectWidget
 
 
+class UserLoginForm(forms.ModelForm):
+    class Meta:
+        model = UserLogin
+        fields = "__all__"
+        widgets = {
+            "password": forms.PasswordInput(attrs={"class": "form-control"}),
+        }
+
+
 class EdificioForm(forms.ModelForm):
 
     class Meta:

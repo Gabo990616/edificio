@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.http import Http404, HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import Http404, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from .forms import *
@@ -10,13 +10,80 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
-from django.db.models import Case, When, Value, BooleanField
+import requests
+from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
 
 # Create your views here.
+
+USER_PROVIDER_BASE = "http://127.0.0.1:9000"
 
 
 def home(request):
     return render(request, "app/home.html")
+
+
+def login_with_provider(request):
+    if request.method == "POST":
+        userForm = UserLoginForm(request.POST)
+        data = {"form": userForm}
+        if userForm.is_valid():
+            username = userForm.cleaned_data["username"]
+            password = userForm.cleaned_data["password"]
+
+            # 1) pedir token al proveedor
+            r = requests.post(
+                f"{USER_PROVIDER_BASE}/auth/login",
+                json={"username": username, "password": password},
+                timeout=8,
+            )
+
+            if r.status_code != 200:
+                messages.error(request, "Credenciales inválidas (proveedor).")
+                return render(request, "app/login/login.html", data)
+
+            token = r.json()["access_token"]
+
+            # 2) obtener perfil del usuario (opcional pero recomendable)
+            me = requests.get(
+                f"{USER_PROVIDER_BASE}/users/me",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=8,
+            )
+            if me.status_code != 200:
+                messages.error(request, "No se pudo obtener el perfil del proveedor.")
+                return render(request, "app/login/login.html", data)
+
+            profile = me.json()
+
+            # 3) asegurar usuario local (para que Django maneje sesión/permisos)
+            user, created = User.objects.get_or_create(username=profile["username"])
+            if created:
+                user.email = profile.get("email", "")
+                user.first_name = profile.get("full_name", "").split(" ")[0]
+                user.save()
+
+            # 4) loguear en Django sin password local
+            # (porque el password lo valida el proveedor)
+            user.backend = "django.contrib.auth.backends.ModelBackend"
+            login(request, user)
+
+            # 5) guardar token en sesión por si lo necesitas luego
+            request.session["provider_access_token"] = token
+            request.session["provider_roles"] = profile.get("roles", [])
+
+            next_url = request.GET.get("next") or request.POST.get("next") or "/"
+            return redirect(next_url)
+    else:
+        userForm = UserLoginForm()
+        data = {"form": userForm}
+    return render(request, "app/login/login.html", data)
+
+
+def logout_view(request):
+    logout(request)
+    request.session.flush()
+    return redirect("login")
 
 
 def adicionar_edificio(request):
@@ -738,9 +805,7 @@ def exportar_estado_ocupacion_excel(request):
                         "Ocupantes": conv.nombre + " " + conv.apellidos,
                         "No. Identidad": conv.dni,
                         "País": conv.nacionalidad.name,
-                        "Tipo de Visado": (
-                            conv.tipo_visa if conv.tipo_visa else "N/A"
-                        ),
+                        "Tipo de Visado": (conv.tipo_visa if conv.tipo_visa else "N/A"),
                         "Permanencia": (
                             (
                                 "Permanente"
@@ -769,9 +834,7 @@ def exportar_estado_ocupacion_excel(request):
                         "Ocupantes": arr.nombre + " " + arr.apellidos,
                         "No. Identidad": arr.dni,
                         "País": arr.nacionalidad.name,
-                        "Tipo de Visado": (
-                            arr.tipo_visa if arr.tipo_visa else "N/A"
-                        ),
+                        "Tipo de Visado": (arr.tipo_visa if arr.tipo_visa else "N/A"),
                         "Permanencia": (
                             (
                                 "Permanente"
